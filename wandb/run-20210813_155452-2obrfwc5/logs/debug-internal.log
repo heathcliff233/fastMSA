@@ -1,0 +1,83 @@
+2021-08-13 15:54:53,143 INFO    MainThread:55094 [internal.py:wandb_internal():88] W&B internal server running at pid: 55094, started at: 2021-08-13 15:54:53.140914
+2021-08-13 15:54:53,144 DEBUG   HandlerThread:55094 [handler.py:handle_request():124] handle_request: check_version
+2021-08-13 15:54:53,144 INFO    WriterThread:55094 [datastore.py:open_for_write():80] open: /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/run-2obrfwc5.wandb
+2021-08-13 15:54:53,146 DEBUG   SenderThread:55094 [sender.py:send():179] send: header
+2021-08-13 15:54:53,146 DEBUG   SenderThread:55094 [sender.py:send_request():193] send_request: check_version
+2021-08-13 15:54:54,015 DEBUG   SenderThread:55094 [sender.py:send():179] send: run
+2021-08-13 15:55:08,716 INFO    SenderThread:55094 [dir_watcher.py:__init__():168] watching files in: /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files
+2021-08-13 15:55:08,717 DEBUG   HandlerThread:55094 [handler.py:handle_request():124] handle_request: run_start
+2021-08-13 15:55:08,717 INFO    SenderThread:55094 [sender.py:_start_run_threads():716] run started: 2obrfwc5 with start time 1628841292
+2021-08-13 15:55:08,718 DEBUG   SenderThread:55094 [sender.py:send():179] send: summary
+2021-08-13 15:55:08,722 INFO    SenderThread:55094 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-08-13 15:55:08,723 DEBUG   HandlerThread:55094 [meta.py:__init__():39] meta init
+2021-08-13 15:55:08,723 DEBUG   HandlerThread:55094 [meta.py:__init__():53] meta init done
+2021-08-13 15:55:08,723 DEBUG   HandlerThread:55094 [meta.py:probe():210] probe
+2021-08-13 15:55:08,729 DEBUG   HandlerThread:55094 [meta.py:_setup_git():200] setup git
+2021-08-13 15:55:08,747 DEBUG   HandlerThread:55094 [meta.py:_setup_git():207] setup git done
+2021-08-13 15:55:08,747 DEBUG   HandlerThread:55094 [meta.py:_save_pip():57] save pip
+2021-08-13 15:55:08,751 DEBUG   HandlerThread:55094 [meta.py:_save_pip():71] save pip done
+2021-08-13 15:55:08,751 DEBUG   HandlerThread:55094 [meta.py:_save_conda():78] save conda
+2021-08-13 15:55:09,719 INFO    Thread-8  :55094 [dir_watcher.py:_on_file_created():216] file/dir created: /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files/requirements.txt
+2021-08-13 15:55:09,719 INFO    Thread-8  :55094 [dir_watcher.py:_on_file_created():216] file/dir created: /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files/conda-environment.yaml
+2021-08-13 15:55:09,719 INFO    Thread-8  :55094 [dir_watcher.py:_on_file_created():216] file/dir created: /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files/wandb-summary.json
+2021-08-13 15:55:13,724 INFO    Thread-8  :55094 [dir_watcher.py:_on_file_created():216] file/dir created: /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files/output.log
+2021-08-13 15:55:15,727 INFO    Thread-8  :55094 [dir_watcher.py:_on_file_created():216] file/dir created: /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files/media/graph/graph_0_summary_3477adddcd64ebb0686e.graph.json
+2021-08-13 15:55:15,728 INFO    Thread-8  :55094 [dir_watcher.py:_on_file_created():216] file/dir created: /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files/media
+2021-08-13 15:55:15,728 INFO    Thread-8  :55094 [dir_watcher.py:_on_file_created():216] file/dir created: /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files/media/graph
+2021-08-13 15:55:16,027 DEBUG   HandlerThread:55094 [meta.py:_save_conda():86] save conda done
+2021-08-13 15:55:16,028 DEBUG   HandlerThread:55094 [meta.py:probe():252] probe done
+2021-08-13 15:55:16,135 DEBUG   HandlerThread:55094 [handler.py:handle_request():124] handle_request: stop_status
+2021-08-13 15:55:16,135 DEBUG   SenderThread:55094 [sender.py:send_request():193] send_request: stop_status
+2021-08-13 15:55:16,732 INFO    Thread-8  :55094 [dir_watcher.py:_on_file_modified():229] file/dir modified: /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files/output.log
+2021-08-13 15:55:16,732 INFO    Thread-8  :55094 [dir_watcher.py:_on_file_modified():229] file/dir modified: /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files/conda-environment.yaml
+2021-08-13 15:55:16,732 INFO    Thread-8  :55094 [dir_watcher.py:_on_file_created():216] file/dir created: /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files/wandb-metadata.json
+2021-08-13 15:55:17,023 DEBUG   SenderThread:55094 [sender.py:send():179] send: files
+2021-08-13 15:55:17,023 INFO    SenderThread:55094 [sender.py:_save_file():841] saving file media/graph/graph_0_summary_3477adddcd64ebb0686e.graph.json with policy now
+2021-08-13 15:55:17,023 DEBUG   SenderThread:55094 [sender.py:send():179] send: summary
+2021-08-13 15:55:17,029 INFO    SenderThread:55094 [sender.py:_save_file():841] saving file wandb-summary.json with policy end
+2021-08-13 15:55:17,029 DEBUG   SenderThread:55094 [sender.py:send():179] send: files
+2021-08-13 15:55:17,029 INFO    SenderThread:55094 [sender.py:_save_file():841] saving file wandb-metadata.json with policy now
+2021-08-13 15:55:17,733 INFO    Thread-8  :55094 [dir_watcher.py:_on_file_modified():229] file/dir modified: /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files/wandb-summary.json
+2021-08-13 15:55:18,290 INFO    Thread-11 :55094 [upload_job.py:push():137] Uploaded file /tmp/tmpd0unzb2gwandb/20fpmx9y-media/graph/graph_0_summary_3477adddcd64ebb0686e.graph.json
+2021-08-13 15:55:18,352 INFO    Thread-12 :55094 [upload_job.py:push():137] Uploaded file /tmp/tmpd0unzb2gwandb/17xejdl4-wandb-metadata.json
+2021-08-13 15:55:18,738 INFO    Thread-8  :55094 [dir_watcher.py:_on_file_modified():229] file/dir modified: /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files/output.log
+2021-08-13 15:55:32,025 DEBUG   HandlerThread:55094 [handler.py:handle_request():124] handle_request: stop_status
+2021-08-13 15:55:32,026 DEBUG   SenderThread:55094 [sender.py:send_request():193] send_request: stop_status
+2021-08-13 15:55:40,381 DEBUG   SenderThread:55094 [sender.py:send():179] send: stats
+2021-08-13 15:55:47,936 DEBUG   HandlerThread:55094 [handler.py:handle_request():124] handle_request: stop_status
+2021-08-13 15:55:47,937 DEBUG   SenderThread:55094 [sender.py:send_request():193] send_request: stop_status
+2021-08-13 15:56:10,099 DEBUG   HandlerThread:55094 [handler.py:handle_request():124] handle_request: stop_status
+2021-08-13 15:56:10,100 DEBUG   SenderThread:55094 [sender.py:send_request():193] send_request: stop_status
+2021-08-13 15:56:14,514 DEBUG   SenderThread:55094 [sender.py:send():179] send: stats
+2021-08-13 15:56:25,988 DEBUG   HandlerThread:55094 [handler.py:handle_request():124] handle_request: stop_status
+2021-08-13 15:56:25,989 DEBUG   SenderThread:55094 [sender.py:send_request():193] send_request: stop_status
+2021-08-13 15:56:41,878 DEBUG   HandlerThread:55094 [handler.py:handle_request():124] handle_request: stop_status
+2021-08-13 15:56:41,890 DEBUG   SenderThread:55094 [sender.py:send_request():193] send_request: stop_status
+2021-08-13 15:56:48,919 DEBUG   SenderThread:55094 [sender.py:send():179] send: stats
+2021-08-13 15:56:57,703 DEBUG   HandlerThread:55094 [handler.py:handle_request():124] handle_request: stop_status
+2021-08-13 15:56:57,704 DEBUG   SenderThread:55094 [sender.py:send_request():193] send_request: stop_status
+2021-08-13 15:57:03,105 WARNING MainThread:55094 [internal.py:wandb_internal():147] Internal process interrupt: 1
+2021-08-13 15:57:13,465 DEBUG   HandlerThread:55094 [handler.py:handle_request():124] handle_request: stop_status
+2021-08-13 15:57:13,466 DEBUG   SenderThread:55094 [sender.py:send_request():193] send_request: stop_status
+2021-08-13 15:57:27,129 WARNING MainThread:55094 [internal.py:is_dead():366] Internal process exiting, parent pid 54990 disappeared
+2021-08-13 15:57:27,130 ERROR   MainThread:55094 [internal.py:wandb_internal():143] Internal process shutdown.
+2021-08-13 15:57:27,335 INFO    SenderThread:55094 [sender.py:finish():945] shutting down sender
+2021-08-13 15:57:27,335 INFO    SenderThread:55094 [dir_watcher.py:finish():282] shutting down directory watcher
+2021-08-13 15:57:27,485 INFO    HandlerThread:55094 [handler.py:finish():638] shutting down handler
+2021-08-13 15:57:27,761 INFO    SenderThread:55094 [dir_watcher.py:finish():312] scan: /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files
+2021-08-13 15:57:27,761 INFO    SenderThread:55094 [dir_watcher.py:finish():318] scan save: /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files/requirements.txt requirements.txt
+2021-08-13 15:57:27,762 INFO    SenderThread:55094 [dir_watcher.py:finish():318] scan save: /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files/wandb-metadata.json wandb-metadata.json
+2021-08-13 15:57:27,762 INFO    SenderThread:55094 [dir_watcher.py:finish():318] scan save: /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files/wandb-summary.json wandb-summary.json
+2021-08-13 15:57:27,762 INFO    SenderThread:55094 [dir_watcher.py:finish():318] scan save: /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files/conda-environment.yaml conda-environment.yaml
+2021-08-13 15:57:27,762 INFO    SenderThread:55094 [dir_watcher.py:finish():318] scan save: /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files/output.log output.log
+2021-08-13 15:57:27,762 INFO    SenderThread:55094 [dir_watcher.py:finish():318] scan save: /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files/config.yaml config.yaml
+2021-08-13 15:57:27,774 INFO    SenderThread:55094 [dir_watcher.py:finish():318] scan save: /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files/media/graph/graph_0_summary_3477adddcd64ebb0686e.graph.json media/graph/graph_0_summary_3477adddcd64ebb0686e.graph.json
+2021-08-13 15:57:27,774 INFO    SenderThread:55094 [file_pusher.py:finish():177] shutting down file pusher
+2021-08-13 15:57:27,774 INFO    SenderThread:55094 [file_pusher.py:join():182] waiting for file pusher
+2021-08-13 15:57:27,926 INFO    WriterThread:55094 [datastore.py:close():288] close: /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/run-2obrfwc5.wandb
+2021-08-13 15:57:29,088 INFO    Thread-14 :55094 [upload_job.py:push():137] Uploaded file /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files/wandb-summary.json
+2021-08-13 15:57:29,103 INFO    Thread-17 :55094 [upload_job.py:push():137] Uploaded file /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files/config.yaml
+2021-08-13 15:57:29,121 INFO    Thread-15 :55094 [upload_job.py:push():137] Uploaded file /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files/conda-environment.yaml
+2021-08-13 15:57:29,691 INFO    Thread-16 :55094 [upload_job.py:push():137] Uploaded file /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files/output.log
+2021-08-13 15:57:29,716 INFO    Thread-13 :55094 [upload_job.py:push():137] Uploaded file /user/hongliang/mydpr/wandb/run-20210813_155452-2obrfwc5/files/requirements.txt
+2021-08-13 15:57:30,652 INFO    MainThread:55094 [internal.py:handle_exit():78] Internal process exited

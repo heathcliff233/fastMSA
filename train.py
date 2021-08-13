@@ -1,3 +1,5 @@
+from torch.distributed.distributed_c10d import get_rank
+from torch.utils.data import distributed
 import wandb
 import torch
 from torch.cuda.amp import autocast as autocast
@@ -5,16 +7,23 @@ from torch.cuda.amp import GradScaler as GradScaler
 
 def train(model, train_loader, eval_loader, n_epoches, optimizer, threshold=0.7, eval_per_step=10, use_wandb=False, use_distr=True, device="cuda:0", acc_step=1):
     if use_wandb:
-        wandb.watch(model, log_freq=eval_per_step)
+        if use_distr:
+            if torch.distributed.get_rank()==0:
+                wandb.watch(model, log_freq=eval_per_step)
+        else:
+            wandb.watch(model, log_freq=eval_per_step)
     if use_distr:
         scaler = GradScaler()
+    save(model, -1)
     for epoch in range(n_epoches):
-        print("epoch " + str(epoch+1))
+        if (use_distr and torch.distributed.get_rank==0) or not use_distr:
+            print("epoch " + str(epoch+1))
+            print("train")
         cnt = 0
         tot_loss = 0
         
         model.train()
-        print("train")
+        
         #pbar = tqdm(train_loader, unit="batch")
         #for toks1, toks2 in pbar:
         for i, (toks1, toks2) in enumerate(train_loader):
@@ -32,11 +41,19 @@ def train(model, train_loader, eval_loader, n_epoches, optimizer, threshold=0.7,
             
             if cnt%eval_per_step == 0 :
                 if cnt%(eval_per_step*1)==0:
-                    acc = evaluate(model, eval_loader, threshold)
-                    ac2 = evaluate(model, train_loader,threshold)
-                    print("loss"+str(tot_loss/eval_per_step))
+                    acc = evaluate(model, eval_loader, threshold, use_distr=use_distr)
+                    ac2 = evaluate(model, train_loader,threshold, use_distr=use_distr)
+                    
+                    acc = acc.view(-1).cpu().item()
+                    if (use_distr and torch.distributed.get_rank==0) or not use_distr:
+                        print("acc: ", acc)
+                        print("loss"+str(tot_loss/eval_per_step))
                     if use_wandb :
-                        wandb.log({"train/train-acc": ac2, "train/eval-acc": acc,"train/loss": tot_loss/eval_per_step})
+                        if use_distr:
+                            if torch.distributed.get_rank()==0:
+                                wandb.log({"train/train-acc": ac2, "train/eval-acc": acc,"train/loss": tot_loss/eval_per_step})
+                        else :
+                            wandb.log({"train/train-acc": ac2, "train/eval-acc": acc,"train/loss": tot_loss/eval_per_step}) 
                     tot_loss = 0
                 model.train()
             
@@ -64,14 +81,30 @@ def train(model, train_loader, eval_loader, n_epoches, optimizer, threshold=0.7,
                             out = model((toks1, toks2))
                         loss = model.module.get_loss(out)
                         scaler.scale(loss).backward()
-            '''
+        save(model, epoch)
+
+
+def evaluate(model, loader, threshold, use_distr=False):
+    model.eval()
+    correct = torch.tensor([0]).cuda()
+    total = torch.tensor([0]).cuda()
+    for i, (toks1, toks2) in enumerate(loader):
+        if i>20:
+            break
+        if use_distr:
             with torch.no_grad():
-                p, n = model.get_avg(model.forward_once(inputs), labels)
-            #print(p, n)
-            '''
-            #optimizer.step()
-        #save(model, epoch)
+                out = model((toks1, toks2))
+            right, num = model.module.get_acc(out)
+            correct += right
+            total += num
+        else:
+            right, num = model.get_acc(model((toks1, toks2)))
+            correct += right
+            total += num
+    torch.distributed.all_reduce(correct, op=torch.distributed.ReduceOp.SUM)
+    torch.distributed.all_reduce(total, op=torch.distributed.ReduceOp.SUM)
+    return correct / total
 
 
-def evaluate(model, loader, threshold):
-    return 0
+def save(model, epoch):
+    torch.save(model.state_dict(), './store/'+str(epoch)+'.pth')

@@ -30,22 +30,26 @@ class MyEncoder(nn.Module):
 
     def get_loss(self, ebd):
         qebd, cebd = ebd 
-        print("q/c vec shape :", qebd.shape, cebd.shape)
         sim_mx = dot_product_scores(qebd, cebd)
-        #label = torch.eye(sim_mx.shape[0]).long()
         label = torch.arange(sim_mx.shape[0], dtype=torch.long)
         sm_score = F.log_softmax(sim_mx, dim=1)
-        max_score, max_idxs = torch.max(sm_score, 1)
-        correct_predictions_count = (
-            max_idxs == label.to(sm_score.device)
-        ).sum()
-        print("prediction ", correct_predictions_count.detach().cpu().item(), sim_mx.shape[0])
         loss = F.nll_loss(
             sm_score,
             label.to(sm_score.device),
             reduction="mean"
         )
         return loss
+    
+    def get_acc(self, ebd):
+        qebd, cebd = ebd 
+        sim_mx = dot_product_scores(qebd, cebd)
+        label = torch.arange(sim_mx.shape[0], dtype=torch.long)
+        sm_score = F.log_softmax(sim_mx, dim=1)
+        max_score, max_idxs = torch.max(sm_score, 1)
+        correct_predictions_count = (
+            max_idxs == label.to(sm_score.device)
+        ).sum()
+        return correct_predictions_count, sim_mx.shape[0]
 
 
 def dot_product_scores(q_vectors, ctx_vectors):

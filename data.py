@@ -8,15 +8,17 @@ import random
 import subprocess
 DISTRIBUTED = True
 class  MyDataset(Dataset):
-    def __init__(self, root: str, is_train: bool):
+    def __init__(self, root: str, is_train: bool, names: str, lines: List[int]):
         self.root = root
-        self.names, self.lines = self.get_filename(root)
+        self.names = names
+        self.lines = lines
+        #self.names, self.lines = self.get_filename(root)
         self.is_train = is_train
 
     def wc_count(self, file_name):
-        #out = subprocess.getoutput("wc -l %s" % file_name)
-        #return int(out.split()[0])
-        return 200
+        out = subprocess.getoutput("wc -l %s" % file_name)
+        return int(out.split()[0])
+        #return 200
     
     def get_filename(self, path: str) -> List[str]:
         files = os.listdir(path)
@@ -33,7 +35,7 @@ class  MyDataset(Dataset):
         if self.is_train:
             span = range(int(lines*0.8))
         else:
-            span = range(int(lines*0.8,lines))
+            span = range(int(lines*0.8),lines)
         idx1, idx2 = random.sample(span, 2)
         seq1 = re.sub('[(a-z)(-)]', '', linecache.getline(path, 2*idx1 + 2))
         seq2 = re.sub('[(a-z)(-)]', '', linecache.getline(path, 2*idx2 + 2))

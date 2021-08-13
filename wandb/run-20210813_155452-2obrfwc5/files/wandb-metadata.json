@@ -1,0 +1,26 @@
+{
+    "os": "Linux-3.10.0-1160.31.1.el7.x86_64-x86_64-with-glibc2.17",
+    "python": "3.8.10",
+    "heartbeatAt": "2021-08-13T07:55:08.723441",
+    "startedAt": "2021-08-13T07:54:52.334273",
+    "docker": null,
+    "gpu": "Tesla V100-PCIE-32GB",
+    "gpu_count": 8,
+    "cpu_count": 104,
+    "cuda": null,
+    "args": [
+        "--local_rank=0"
+    ],
+    "state": "running",
+    "program": "main.py",
+    "codePath": "main.py",
+    "git": {
+        "remote": null,
+        "commit": "3b7871c62a099e4ed4b2a7a12962f9f562e0d229"
+    },
+    "email": "brighthong233@gmail.com",
+    "root": "/user/hongliang/mydpr",
+    "host": "gpu002",
+    "username": "hongliang",
+    "executable": "/user/hongliang/miniconda3/envs/bert17/bin/python3"
+}

@@ -1,0 +1,63 @@
+
+loaded dataset
+epoch 1
+train
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+q/c vec shape : torch.Size([16, 768]) torch.Size([16, 768])
+Traceback (most recent call last):
+  File "main.py", line 97, in <module>
+    train(
+  File "/user/hongliang/mydpr/train.py", line 40, in train
+    acc = evaluate(model, eval_loader, threshold, use_distr=use_distr)
+  File "/user/hongliang/mydpr/train.py", line 91, in evaluate
+    for i, (toks1, toks2) in enumerate(loader):
+  File "/user/hongliang/miniconda3/envs/bert17/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 435, in __next__
+    data = self._next_data()
+  File "/user/hongliang/miniconda3/envs/bert17/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 475, in _next_data
+    data = self._dataset_fetcher.fetch(index)  # may raise StopIteration
+  File "/user/hongliang/miniconda3/envs/bert17/lib/python3.8/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/user/hongliang/miniconda3/envs/bert17/lib/python3.8/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/user/hongliang/mydpr/data.py", line 45, in __getitem__
+    seq1, seq2 = self.get_pair(self.names[index], self.lines[index])
+  File "/user/hongliang/mydpr/data.py", line 38, in get_pair
+    span = range(int(lines*0.8,lines))
+ValueError: int() base must be >= 2 and <= 36, or 0
