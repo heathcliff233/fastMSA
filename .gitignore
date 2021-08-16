@@ -1,2 +1,5 @@
 __pycache__/*
 *.pth
+wandb/*
+*.a3m
+ebd/*

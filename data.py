@@ -6,7 +6,19 @@ import re
 import os
 import random
 import subprocess
-DISTRIBUTED = True
+from Bio import SeqIO
+
+class EbdDataset(Dataset):
+    def __init__(self, path):
+        self.records = list(SeqIO.parse(path, "fasta"))
+
+    def __len__(self):
+        return len(self.records)
+
+    def __getitem__(self, index):
+        rec = self.records[index]
+        return rec.id, re.sub('[(a-z)(-)]', '', rec.seq.__str__())
+
 class  MyDataset(Dataset):
     def __init__(self, root: str, is_train: bool, names: str, lines: List[int]):
         self.root = root
@@ -32,6 +44,15 @@ class  MyDataset(Dataset):
         return names, lines
 
     def get_pair(self, path: str, lines: int) -> Tuple[str, str]:
+        if lines == 2:
+            seq1 = re.sub('[(a-z)(-)]', '', linecache.getline(path, 2))
+            seq2 = re.sub('[(a-z)(-)]', '', linecache.getline(path, 2))
+            return seq1, seq2
+        elif lines < 20:
+            seq1 = re.sub('[(a-z)(-)]', '', linecache.getline(path, 2))
+            seq2 = re.sub('[(a-z)(-)]', '', linecache.getline(path, 4))
+            return seq1, seq2
+        lines = lines//2
         if self.is_train:
             span = range(int(lines*0.8))
         else:
@@ -151,4 +172,41 @@ class BatchConverter(object):
                 tokens1[i, min(len(seq_str1), max_len) + int(self.alphabet.prepend_bos)] = self.alphabet.eos_idx
                 tokens2[i, min(len(seq_str2), max_len) + int(self.alphabet.prepend_bos)] = self.alphabet.eos_idx
         return tokens1, tokens2
+
+class SingleConverter(object):
+    """Callable to convert an unprocessed (labels + strings) batch to a
+    processed (labels + tensor) batch.
+    """
+
+    def __init__(self, alphabet):
+        self.alphabet = alphabet
+
+    def __call__(self, raw_batch: Sequence[Tuple[str, str]]):
+        # RoBERTa uses an eos token, while ESM-1 does not.
+        limit_size = 500
+        batch_size = len(raw_batch)
+        max_len = max(len(seq) for id, seq in raw_batch)
+        max_len = min(limit_size, max_len)
+        ids = []
+        tokens = torch.empty(
+            (
+                batch_size,
+                max_len + int(self.alphabet.prepend_bos) + int(self.alphabet.append_eos),
+            ),
+            dtype=torch.int64,
+        )
+        tokens.fill_(self.alphabet.padding_idx)
+
+        for i, (id, seq_str) in enumerate(raw_batch):
+            if self.alphabet.prepend_bos:
+                tokens[i, 0] = self.alphabet.cls_idx
+            seq1 = torch.tensor([self.alphabet.get_idx(s) for s in seq_str[:limit_size]], dtype=torch.int64)
+            ids.append(id)
+            tokens[
+                i,
+                int(self.alphabet.prepend_bos) : min(len(seq_str), max_len) + int(self.alphabet.prepend_bos),
+            ] = seq1
+            if self.alphabet.append_eos:
+                tokens[i, min(len(seq_str), max_len) + int(self.alphabet.prepend_bos)] = self.alphabet.eos_idx
+        return ids, tokens
 

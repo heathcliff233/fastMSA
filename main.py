@@ -14,8 +14,8 @@ from data import MyDataset, BatchConverter, DistributedProxySampler
 from train import train, evaluate
 
 DISTRIBUTED = True
-TRBATCHSZ = 16
-EVBATCHSZ = 16
+TRBATCHSZ = 4
+EVBATCHSZ = 4
 use_wandb = False
 threshold = 0.7
 eval_per_step = 40
@@ -24,18 +24,23 @@ use_wandb = True
 path = "/share/wangsheng/train_test_data/cath35_20201021/cath35_a3m/"
 
 def wc_count(file_name):
-    return 200
-    #out = subprocess.getoutput("wc -l %s" % file_name)
-    #return int(out.split()[0])
+    #return 200
+    out = subprocess.getoutput("wc -l %s" % file_name)
+    res = int(out.split()[0])
+    return res
     
 def get_filename(path: str) -> List[str]:
     files = os.listdir(path)
-    names = []
-    lines = []
+    pivot = 0
+    names = [None] * 32628
+    lines = [0] * 32628
     for file in files:
         if ".a3m" in file:
-            names.append(path + file)
-    lines = [wc_count(name) for name in names]
+            names[pivot] = path + file
+            lines[pivot] = wc_count(path+file)
+            pivot += 1
+            #names.append(path + file)
+    #lines = [wc_count(name) for name in names]
 
     return names, lines
 
@@ -52,7 +57,8 @@ def init_wandb():
 
 
 if __name__ == "__main__":
-    encoder, alphabet = esm.pretrained.esm1_t6_43M_UR50S()
+    #encoder, alphabet = esm.pretrained.esm1_t6_43M_UR50S()
+    encoder, alphabet = esm.pretrained.esm1b_t33_650M_UR50S()
     print("loaded model")
     
     model = MyEncoder(encoder, 0)
@@ -91,14 +97,15 @@ if __name__ == "__main__":
     batch_converter = BatchConverter(alphabet)
     train_loader = DataLoader(dataset=train_set, collate_fn=batch_converter, batch_sampler=trbatch)
     eval_loader = DataLoader(dataset=eval_set, collate_fn=batch_converter, batch_sampler=evbatch)
-    print("loaded dataset")
+    if (DISTRIBUTED and torch.distributed.get_rank()==0) or (not DISTRIBUTED):
+        print("loaded dataset")
     optimizer = AdamW(model.parameters(), lr=lr)
     scheduler = lr_scheduler.StepLR(optimizer,step_size=40,gamma = 0.85)
     train(
         model, 
         train_loader, 
         eval_loader, 
-        n_epoches=20, 
+        n_epoches=60, 
         optimizer=optimizer, 
         threshold=threshold, 
         eval_per_step=eval_per_step, 

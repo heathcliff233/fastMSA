@@ -1,6 +1,7 @@
 from torch.distributed.distributed_c10d import get_rank
 from torch.utils.data import distributed
 import wandb
+import pickle
 import torch
 from torch.cuda.amp import autocast as autocast
 from torch.cuda.amp import GradScaler as GradScaler
@@ -14,11 +15,10 @@ def train(model, train_loader, eval_loader, n_epoches, optimizer, threshold=0.7,
             wandb.watch(model, log_freq=eval_per_step)
     if use_distr:
         scaler = GradScaler()
-    save(model, -1)
     for epoch in range(n_epoches):
-        if (use_distr and torch.distributed.get_rank==0) or not use_distr:
-            print("epoch " + str(epoch+1))
-            print("train")
+        if (use_distr and torch.distributed.get_rank()==0) or (not use_distr) :
+                print("epoch " + str(epoch+1))
+                print("train")
         cnt = 0
         tot_loss = 0
         
@@ -45,7 +45,7 @@ def train(model, train_loader, eval_loader, n_epoches, optimizer, threshold=0.7,
                     ac2 = evaluate(model, train_loader,threshold, use_distr=use_distr)
                     
                     acc = acc.view(-1).cpu().item()
-                    if (use_distr and torch.distributed.get_rank==0) or not use_distr:
+                    if (use_distr and torch.distributed.get_rank()==0) or not use_distr:
                         print("acc: ", acc)
                         print("loss"+str(tot_loss/eval_per_step))
                     if use_wandb :
@@ -89,7 +89,7 @@ def evaluate(model, loader, threshold, use_distr=False):
     correct = torch.tensor([0]).cuda()
     total = torch.tensor([0]).cuda()
     for i, (toks1, toks2) in enumerate(loader):
-        if i>20:
+        if i>40:
             break
         if use_distr:
             with torch.no_grad():
@@ -105,6 +105,22 @@ def evaluate(model, loader, threshold, use_distr=False):
     torch.distributed.all_reduce(total, op=torch.distributed.ReduceOp.SUM)
     return correct / total
 
+def do_embedding(model, loader, path, use_distr=False, device="cuda:0"):
+    model.eval()
+    res = []
+    for i, (ids, toks) in enumerate(loader):
+        toks = toks.to(device)
+        with torch.no_grad():
+            if use_distr:
+                out = model.module.forward_once(toks)
+            else:
+                out = model.forward_once(toks)
+        out = out.cpu().numpy()
+        res.extend(
+            [(ids[i], out[i]) for i in range(out.shape[0])]
+        )
+    with open(path[:-4], mode="wb") as f:
+        pickle.dump(res, f)
 
 def save(model, epoch):
-    torch.save(model.state_dict(), './store/'+str(epoch)+'.pth')
+    torch.save(model.state_dict(), './full33/'+str(epoch)+'.pth')
