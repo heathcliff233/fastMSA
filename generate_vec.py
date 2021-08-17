@@ -40,6 +40,7 @@ if __name__ == "__main__":
     model = model.to(device)
 
     file_list = os.listdir(path)
+    file_list.sort()
     file_for_this_node = file_list
     if DISTRIBUTED:
         file_for_this_node = file_list[local_rank::4]
