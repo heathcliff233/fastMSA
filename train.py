@@ -17,8 +17,8 @@ def train(model, train_loader, eval_loader, n_epoches, optimizer, threshold=0.7,
         scaler = GradScaler()
     for epoch in range(n_epoches):
         if (use_distr and torch.distributed.get_rank()==0) or (not use_distr) :
-                print("epoch " + str(epoch+1))
-                print("train")
+            print("epoch " + str(epoch+1))
+            print("train")
         cnt = 0
         tot_loss = 0
         
@@ -123,4 +123,4 @@ def do_embedding(model, loader, path, use_distr=False, device="cuda:0"):
         pickle.dump(res, f)
 
 def save(model, epoch):
-    torch.save(model.state_dict(), './full33/'+str(epoch)+'.pth')
+    torch.save(model.state_dict(), './split_train/'+str(epoch)+'.pth')

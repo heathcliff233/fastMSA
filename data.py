@@ -9,7 +9,10 @@ import subprocess
 from Bio import SeqIO
 
 class EbdDataset(Dataset):
-    def __init__(self, path):
+    def __init__(self, path: List[str]):
+        #self.records = []
+        #for i in path:
+        #    self.records.extend(list(SeqIO.parse(i, "fasta")))
         self.records = list(SeqIO.parse(path, "fasta"))
 
     def __len__(self):
@@ -19,46 +22,28 @@ class EbdDataset(Dataset):
         rec = self.records[index]
         return rec.id, re.sub('[(a-z)(-)]', '', rec.seq.__str__())
 
+class QueryDataset(Dataset):
+    def __init__(self, path: List[str]):
+        self.records = []
+        for i in path:
+            self.records.extend(list(SeqIO.parse(i, "fasta")))
+
+    def __len__(self):
+        return len(self.records)
+
+    def __getitem__(self, index):
+        rec = self.records[index]
+        return rec.id, re.sub('[(a-z)(-)]', '', rec.seq.__str__())
+
 class  MyDataset(Dataset):
-    def __init__(self, root: str, is_train: bool, names: str, lines: List[int]):
-        self.root = root
+    def __init__(self, names: List[str], lines: List[int]):
         self.names = names
         self.lines = lines
-        #self.names, self.lines = self.get_filename(root)
-        self.is_train = is_train
-
-    def wc_count(self, file_name):
-        out = subprocess.getoutput("wc -l %s" % file_name)
-        return int(out.split()[0])
-        #return 200
-    
-    def get_filename(self, path: str) -> List[str]:
-        files = os.listdir(path)
-        names = []
-        lines = []
-        for file in files:
-            if ".a3m" in file:
-                names.append(path + file)
-        lines = [self.wc_count(name) for name in names]
-
-        return names, lines
 
     def get_pair(self, path: str, lines: int) -> Tuple[str, str]:
-        if lines == 2:
-            seq1 = re.sub('[(a-z)(-)]', '', linecache.getline(path, 2))
-            seq2 = re.sub('[(a-z)(-)]', '', linecache.getline(path, 2))
-            return seq1, seq2
-        elif lines < 20:
-            seq1 = re.sub('[(a-z)(-)]', '', linecache.getline(path, 2))
-            seq2 = re.sub('[(a-z)(-)]', '', linecache.getline(path, 4))
-            return seq1, seq2
         lines = lines//2
-        if self.is_train:
-            span = range(int(lines*0.8))
-        else:
-            span = range(int(lines*0.8),lines)
-        idx1, idx2 = random.sample(span, 2)
-        seq1 = re.sub('[(a-z)(-)]', '', linecache.getline(path, 2*idx1 + 2))
+        idx2 = random.randint(0, lines-1)
+        seq1 = re.sub('[(a-z)(-)]', '', linecache.getline(path, 2))
         seq2 = re.sub('[(a-z)(-)]', '', linecache.getline(path, 2*idx2 + 2))
         return seq1, seq2
 
@@ -67,12 +52,11 @@ class  MyDataset(Dataset):
         return seq1, seq2
 
     def __len__(self):
-        return len(self.right - self.left)
+        return len(self.names)
 
     def get_batch_indices(self, batch_size: int) -> List[List[int]] :
         batches = []
         buf = []
-        cnt = 0
         iters = len(self.names) // batch_size
 
         for i in range(iters):

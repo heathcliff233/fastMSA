@@ -3,6 +3,7 @@ import wandb
 import subprocess
 import os
 from typing import Sequence, Tuple, List, Union
+import numpy as np
 import esm
 import torch
 import torch.nn as nn
@@ -14,34 +15,25 @@ from data import MyDataset, BatchConverter, DistributedProxySampler
 from train import train, evaluate
 
 DISTRIBUTED = True
-TRBATCHSZ = 4
-EVBATCHSZ = 4
+TRBATCHSZ = 8
+EVBATCHSZ = 8
 use_wandb = False
 threshold = 0.7
-eval_per_step = 40
+eval_per_step = 30
 lr = 1e-5
-use_wandb = True
+#use_wandb = True
 path = "/share/wangsheng/train_test_data/cath35_20201021/cath35_a3m/"
 
 def wc_count(file_name):
-    #return 200
-    out = subprocess.getoutput("wc -l %s" % file_name)
-    res = int(out.split()[0])
-    return res
+    return 4
+    #out = subprocess.getoutput("wc -l %s" % file_name)
+    #res = int(out.split()[0])
+    #return res
     
-def get_filename(path: str) -> List[str]:
-    files = os.listdir(path)
-    pivot = 0
-    names = [None] * 32628
-    lines = [0] * 32628
-    for file in files:
-        if ".a3m" in file:
-            names[pivot] = path + file
-            lines[pivot] = wc_count(path+file)
-            pivot += 1
-            #names.append(path + file)
-    #lines = [wc_count(name) for name in names]
-
+def get_filename(sel_path: str) -> List[str]:
+    path_list = np.genfromtxt(sel_path, dtype='str').T[0]
+    names = [path+str(name)+'.a3m' for name in path_list]
+    lines = [wc_count(name) for name in names]
     return names, lines
 
 def init_wandb():
@@ -57,8 +49,8 @@ def init_wandb():
 
 
 if __name__ == "__main__":
-    #encoder, alphabet = esm.pretrained.esm1_t6_43M_UR50S()
-    encoder, alphabet = esm.pretrained.esm1b_t33_650M_UR50S()
+    encoder, alphabet = esm.pretrained.esm1_t6_43M_UR50S()
+    #encoder, alphabet = esm.pretrained.esm1b_t33_650M_UR50S()
     print("loaded model")
     
     model = MyEncoder(encoder, 0)
@@ -79,11 +71,17 @@ if __name__ == "__main__":
             init_wandb()
     
     model = model.to(device)
-    names, lines = get_filename(path)
-    train_set = MyDataset(path, True, names, lines)
-    eval_set = MyDataset(path, False, names, lines)
+    trpath = './split/train.txt'
+    trnames, trlines = get_filename(trpath)
+    trnames = [path+name for name in trnames]
+    evpath = './split/valid.txt'
+    evnames, evlines = get_filename(evpath)
+    evnames = [path+name for name in evnames]
+    print(len(trnames))
+    train_set = MyDataset(trnames, trlines)
+    eval_set = MyDataset(evnames, evlines)
     trbatch = train_set.get_batch_indices(TRBATCHSZ)
-    evbatch = train_set.get_batch_indices(EVBATCHSZ)
+    evbatch = eval_set.get_batch_indices(EVBATCHSZ)
     if DISTRIBUTED:
         model = torch.nn.parallel.DistributedDataParallel(
             model,
@@ -91,8 +89,8 @@ if __name__ == "__main__":
             output_device=local_rank,
             find_unused_parameters=True
         )
-        trbatch = DistributedProxySampler(trbatch, num_replicas=4, rank=local_rank)
-        evbatch = DistributedProxySampler(evbatch, num_replicas=4, rank=local_rank)
+        trbatch = DistributedProxySampler(trbatch, num_replicas=2, rank=local_rank)
+        evbatch = DistributedProxySampler(evbatch, num_replicas=2, rank=local_rank)
     
     batch_converter = BatchConverter(alphabet)
     train_loader = DataLoader(dataset=train_set, collate_fn=batch_converter, batch_sampler=trbatch)
