@@ -1,6 +1,7 @@
 import pickle
 import os
 import sys
+import re
 import numpy as np
 from typing import Sequence, Tuple, List, Union
 import esm
@@ -43,8 +44,10 @@ def qencode(model, loader, device="cuda:0"):
 def get_idx(idx, lst):
     cnt = 0
     tot = len(lst)
-    while idx >= lst[cnt] and idx <= (tot-1):
+    while idx >= lst[cnt] :
         cnt += 1
+        if cnt == tot :
+            break
     cnt -= 1
     return cnt, idx-lst[cnt]
 
@@ -63,7 +66,11 @@ if __name__ == "__main__":
     batch_converter = SingleConverter(alphabet)
     path_list = np.genfromtxt(path, dtype='str').T[0]
     path_list.sort()
+    ###################
+    #path_list = path_list[:10]
     query_list = [qdir+str(name)+'.seq' for name in path_list]
+    ###################
+    #query_list = query_list[:10]
     dataset = QueryDataset(query_list)
     dataloader = DataLoader(dataset=dataset, batch_size=1, shuffle=False, collate_fn=batch_converter)
     encoded = qencode(model, dataloader, device=device)
@@ -72,13 +79,19 @@ if __name__ == "__main__":
 
     ctx_list = os.listdir('./split_ebd')
     ctx_list.sort()
+    ###################
+    #ctx_list = ctx_list[:10]
     ttpath = './split/test.txt'
     file_list, lines = get_filename(ttpath)
     
     sorted_id = sorted(range(len(file_list)), key=lambda k: file_list[k])
     file_list.sort()
+    ####################
+    #file_list = file_list[:10]
     src_list = [msadir+file for file in file_list]
     lines = [lines[i] for i in sorted_id]
+    ####################
+    #lines = lines[:10]
     pctg = [0]*len(lines)
     for i in range(1, len(lines)):
         pctg[i] = pctg[i-1] + lines[i-1]//2
@@ -100,19 +113,22 @@ if __name__ == "__main__":
     print("loaded ctx", file=sys.stderr)
     tot_query = encoded.shape[0]
     for i in range(tot_query//10):
-        scores, idxes = index.search(encoded[i*10:(i+1)*10], 256)
+        scores, idxes = index.search(encoded[i*10:(i+1)*10], 32)
         right = 0
         for j in range(10):
             for id in idxes[j]:
-                if pctg[i*10+j] <= id < pctg[i*10+j]+min(lines[i*10+j]//2, 64) :
+                if pctg[i*10+j] <= id < pctg[i*10+j]+lines[i*10+j]//2 :
                     right += 1
-            print(right/min(64, lines[i*10+j]//2))
+            print(right, min(32, lines[i*10+j]//2))
             right = 0
-            with open(save_path+file_list[i*10+j], mode='wb') as f:
-                for idx in idxes[j]:
-                    cnt, fidx = get_idx(idx, pctg)
-                    seq_name = linecache.getline(src_list[cnt], 2*cnt+1)
-                    seq_str  = linecache.getline(linecache.__file__, 2*cnt+2)
-                    f.write(seq_name+seq_str)
+            f = open(save_path+file_list[i*10+j], mode='w')
+            #print(pctg[i*10+j])
+            #print(idxes[j])
+            for idx in idxes[j]:
+                cnt, fidx = get_idx(idx, pctg)
+                seq_name = linecache.getline(src_list[cnt], 2*fidx+1)
+                seq_str  = re.sub('[(a-z)(\-)]', '', linecache.getline(src_list[cnt], 2*fidx+2))
+                f.write(str(seq_name)+str(seq_str))
+            f.close()
 
 

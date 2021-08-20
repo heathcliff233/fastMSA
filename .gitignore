@@ -5,3 +5,7 @@ wandb/*
 ebd/*
 split_ebd/*
 split_train/*
+split_train_new/*
+pred/*
+pred-202108192300/*
+align_pred/*

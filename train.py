@@ -123,4 +123,4 @@ def do_embedding(model, loader, path, use_distr=False, device="cuda:0"):
         pickle.dump(res, f)
 
 def save(model, epoch):
-    torch.save(model.state_dict(), './split_train/'+str(epoch)+'.pth')
+    torch.save(model.state_dict(), './split_train_new/'+str(epoch)+'.pth')

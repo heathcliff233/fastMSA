@@ -15,6 +15,7 @@ from myutils import wc_count, get_filename
 
 DISTRIBUTED = True
 BATCHSZ = 128
+num_gpus = 4
 #path = "./testset/"
 path = "/share/wangsheng/train_test_data/cath35_20201021/cath35_a3m/"
 save_path = './split_ebd/'
@@ -53,7 +54,7 @@ if __name__ == "__main__":
     #    pctg[i] = pctg[i-1] + lines[i-1]
     file_for_this_node = file_list
     if DISTRIBUTED:
-        file_for_this_node = file_list[local_rank::4]
+        file_for_this_node = file_list[local_rank::num_gpus]
         model = torch.nn.parallel.DistributedDataParallel(
             model,
             device_ids=[local_rank],

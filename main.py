@@ -13,28 +13,29 @@ from torch.utils.data import Dataset, DataLoader
 from model import MyEncoder
 from data import MyDataset, BatchConverter, DistributedProxySampler
 from train import train, evaluate
+from myutils import get_filename
 
 DISTRIBUTED = True
-TRBATCHSZ = 8
-EVBATCHSZ = 8
-use_wandb = False
+TRBATCHSZ = 24
+EVBATCHSZ = 24
+use_wandb = True
 threshold = 0.7
 eval_per_step = 30
 lr = 1e-5
 #use_wandb = True
 path = "/share/wangsheng/train_test_data/cath35_20201021/cath35_a3m/"
 
-def wc_count(file_name):
-    return 4
+#def wc_count(file_name):
+    #return 4
     #out = subprocess.getoutput("wc -l %s" % file_name)
     #res = int(out.split()[0])
     #return res
     
-def get_filename(sel_path: str) -> List[str]:
-    path_list = np.genfromtxt(sel_path, dtype='str').T[0]
-    names = [path+str(name)+'.a3m' for name in path_list]
-    lines = [wc_count(name) for name in names]
-    return names, lines
+#def get_filename(sel_path: str) -> List[str]:
+    #path_list = np.genfromtxt(sel_path, dtype='str').T[0]
+    #names = [path+str(name)+'.a3m' for name in path_list]
+    #lines = [wc_count(name) for name in names]
+    #return names, lines
 
 def init_wandb():
     wandb.init(
