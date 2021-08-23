@@ -15,10 +15,10 @@ from myutils import wc_count, get_filename
 
 DISTRIBUTED = True
 BATCHSZ = 128
-num_gpus = 4
+num_gpus = 2
 #path = "./testset/"
 path = "/share/wangsheng/train_test_data/cath35_20201021/cath35_a3m/"
-save_path = './split_ebd/'
+save_path = './split_ebd_continue/'
 
 if __name__ == "__main__":
     encoder, alphabet = esm.pretrained.esm1_t6_43M_UR50S()
@@ -27,7 +27,7 @@ if __name__ == "__main__":
     print("loaded model")
     
     model = MyEncoder(encoder, 0)
-    prev = torch.load('./split_train_new/39.pth')
+    prev = torch.load('./continue_train/59.pth')
     later = dict((k[7:], v) for (k,v) in prev.items())
     model.load_state_dict(later)
     #model.load_state_dict(torch.load('./full/19.pth').module)

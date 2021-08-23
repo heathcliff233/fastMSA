@@ -6,6 +6,7 @@ ebd/*
 split_ebd/*
 split_train/*
 split_train_new/*
+split_ebd_continue/*
 pred/*
 pred-202108192300/*
 align_pred/*
