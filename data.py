@@ -20,7 +20,8 @@ class EbdDataset(Dataset):
 
     def __getitem__(self, index):
         rec = self.records[index]
-        return rec.id, re.sub('[(a-z)(\-)]', '', rec.seq.__str__())
+        #return rec.id, re.sub('[(a-z)(\-)]', '', rec.seq.__str__())
+        return rec.id, re.sub('[(\-)]', '', rec.seq.__str__())
 
 class QueryDataset(Dataset):
     def __init__(self, path: List[str]):
@@ -33,7 +34,8 @@ class QueryDataset(Dataset):
 
     def __getitem__(self, index):
         rec = self.records[index]
-        return rec.id, re.sub('[(a-z)(\-)]', '', rec.seq.__str__())
+        #return rec.id, re.sub('[(a-z)(\-)]', '', rec.seq.__str__())
+        return rec.id, re.sub('[(\-)]', '', rec.seq.__str__())
 
 class  MyDataset(Dataset):
     def __init__(self, names: List[str], lines: List[int]):
@@ -43,8 +45,11 @@ class  MyDataset(Dataset):
     def get_pair(self, path: str, lines: int) -> Tuple[str, str]:
         lines = lines//2
         idx2 = random.randint(0, lines-1)
-        seq1 = re.sub('[(a-z)(\-)]', '', linecache.getline(path, 2))
-        seq2 = re.sub('[(a-z)(\-)]', '', linecache.getline(path, 2*idx2 + 2))
+        #seq1 = re.sub('[(a-z)(\-)]', '', linecache.getline(path, 2))
+        #seq2 = re.sub('[(a-z)(\-)]', '', linecache.getline(path, 2*idx2 + 2))
+        seq1 = re.sub('[(\-)]', '', linecache.getline(path, 2))
+        seq2 = re.sub('[(\-)]', '', linecache.getline(path, 2*idx2 + 2))
+
         return seq1, seq2
 
     def __getitem__(self, index: int) -> Tuple[str, str]:

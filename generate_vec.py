@@ -27,7 +27,7 @@ if __name__ == "__main__":
     print("loaded model")
     
     model = MyEncoder(encoder, 0)
-    prev = torch.load('./split_train/39.pth')
+    prev = torch.load('./split_train_new/39.pth')
     later = dict((k[7:], v) for (k,v) in prev.items())
     model.load_state_dict(later)
     #model.load_state_dict(torch.load('./full/19.pth').module)

@@ -17,12 +17,11 @@ from myutils import get_filename
 
 DISTRIBUTED = True
 TRBATCHSZ = 24
-EVBATCHSZ = 24
-use_wandb = True
+EVBATCHSZ = 64
 threshold = 0.7
 eval_per_step = 30
-lr = 1e-5
-#use_wandb = True
+lr = 1e-6
+use_wandb = True
 path = "/share/wangsheng/train_test_data/cath35_20201021/cath35_a3m/"
 
 #def wc_count(file_name):
@@ -55,6 +54,11 @@ if __name__ == "__main__":
     print("loaded model")
     
     model = MyEncoder(encoder, 0)
+    ##################################
+    prev = torch.load('./continue_train/3.pth')
+    later = dict((k[7:], v) for (k,v) in prev.items())
+    model.load_state_dict(later)
+    ##################################
     device = torch.device("cuda:0")
     if DISTRIBUTED:
         torch.distributed.init_process_group(backend="nccl")
@@ -100,6 +104,8 @@ if __name__ == "__main__":
         print("loaded dataset")
     optimizer = AdamW(model.parameters(), lr=lr)
     scheduler = lr_scheduler.StepLR(optimizer,step_size=40,gamma = 0.85)
+    print("res: ", evaluate(model, eval_loader, use_distr=True))
+    
     train(
         model, 
         train_loader, 
@@ -113,4 +119,5 @@ if __name__ == "__main__":
         device=device, 
         acc_step=4
     )
+    
 

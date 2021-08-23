@@ -15,12 +15,13 @@ import faiss
 import linecache
 
 BATCHSZ=8
+tar_num = 256
 #path = "./test.txt"
 path = "./split/split_dataset_test.txt"
 qdir = "/share/wangsheng/train_test_data/cath35_20201021/cath35_seq/"
 msadir = "/share/wangsheng/train_test_data/cath35_20201021/cath35_a3m/"
 ctx_dir = "./split_ebd/"
-save_path = "./pred/"
+save_path = "./pred-202108231140-256/"
 
 def qencode(model, loader, device="cuda:0"):
     model.eval()
@@ -111,15 +112,16 @@ if __name__ == "__main__":
             cnt += 1
             print(cnt, '/'+str(tot_ctx), file=sys.stderr)
     print("loaded ctx", file=sys.stderr)
+    #print(pctg[:10])
     tot_query = encoded.shape[0]
     for i in range(tot_query//10):
-        scores, idxes = index.search(encoded[i*10:(i+1)*10], 32)
+        scores, idxes = index.search(encoded[i*10:(i+1)*10], tar_num)
         right = 0
         for j in range(10):
             for id in idxes[j]:
                 if pctg[i*10+j] <= id < pctg[i*10+j]+lines[i*10+j]//2 :
                     right += 1
-            print(right, min(32, lines[i*10+j]//2))
+            print(file_list[i*10+j], right, min(tar_num, lines[i*10+j]//2))
             right = 0
             f = open(save_path+file_list[i*10+j], mode='w')
             #print(pctg[i*10+j])
@@ -127,8 +129,10 @@ if __name__ == "__main__":
             for idx in idxes[j]:
                 cnt, fidx = get_idx(idx, pctg)
                 seq_name = linecache.getline(src_list[cnt], 2*fidx+1)
-                seq_str  = re.sub('[(a-z)(\-)]', '', linecache.getline(src_list[cnt], 2*fidx+2))
+                #seq_str  = re.sub('[(a-z)(\-)]', '', linecache.getline(src_list[cnt], 2*fidx+2))
+                seq_str  = re.sub('[(\-)]', '', linecache.getline(src_list[cnt], 2*fidx+2))
                 f.write(str(seq_name)+str(seq_str))
             f.close()
+        print("\r Finished ", i, '%', file=sys.stderr, end="")
 
 

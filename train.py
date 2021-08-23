@@ -81,10 +81,13 @@ def train(model, train_loader, eval_loader, n_epoches, optimizer, threshold=0.7,
                             out = model((toks1, toks2))
                         loss = model.module.get_loss(out)
                         scaler.scale(loss).backward()
+                else:
+                    loss = model.get_loss(model((toks1, toks2)))
+                    loss.backward()
         save(model, epoch)
 
 
-def evaluate(model, loader, threshold, use_distr=False):
+def evaluate(model, loader, threshold=0.7, use_distr=False):
     model.eval()
     correct = torch.tensor([0]).cuda()
     total = torch.tensor([0]).cuda()
@@ -123,4 +126,4 @@ def do_embedding(model, loader, path, use_distr=False, device="cuda:0"):
         pickle.dump(res, f)
 
 def save(model, epoch):
-    torch.save(model.state_dict(), './split_train_new/'+str(epoch)+'.pth')
+    torch.save(model.state_dict(), './continue_train/'+str(epoch)+'.pth')
