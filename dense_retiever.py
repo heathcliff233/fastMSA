@@ -9,19 +9,18 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from model import MyEncoder
 from data import QueryDataset, SingleConverter, DistributedProxySampler
-from train import do_embedding
 from myutils import get_filename
 import faiss
 import linecache
 
 BATCHSZ=8
-tar_num = 2048
+tar_num = 20000
 #path = "./test.txt"
 path = "./split/split_dataset_test.txt"
 qdir = "/share/wangsheng/train_test_data/cath35_20201021/cath35_seq/"
 msadir = "/share/wangsheng/train_test_data/cath35_20201021/cath35_a3m/"
-ctx_dir = "./split_ebd/"
-save_path = "./pred-202108232011-2048/"
+ctx_dir = "./split_ebd_continue/"
+save_path = "./pred-202108241047-20000/"
 
 def qencode(model, loader, device="cuda:0"):
     model.eval()
@@ -57,7 +56,7 @@ if __name__ == "__main__":
 
     encoder, alphabet = esm.pretrained.esm1_t6_43M_UR50S()
     model = MyEncoder(encoder, 0)
-    prev = torch.load('./split_train/39.pth')
+    prev = torch.load('./continue_train/59.pth')
     later = dict((k[7:], v) for (k,v) in prev.items())
     model.load_state_dict(later)
     device = torch.device("cuda:0")
@@ -80,7 +79,7 @@ if __name__ == "__main__":
     print(encoded.shape, file=sys.stderr)
     print("encoded query", file=sys.stderr)
 
-    ctx_list = os.listdir('./split_ebd')
+    ctx_list = os.listdir(ctx_dir)
     ctx_list.sort()
     ###################
     #ctx_list = ctx_list[:10]
@@ -104,7 +103,7 @@ if __name__ == "__main__":
     cnt = 0
     tot_ctx = len(ctx_list)
     for i in ctx_list:
-        with open('./split_ebd/'+i, "rb") as reader:
+        with open(ctx_dir+i, "rb") as reader:
             whole_doc = pickle.load(reader)
             for name, tok in whole_doc:
                 buffer.append(tok)
@@ -113,7 +112,7 @@ if __name__ == "__main__":
             buffer = []
             cnt += 1
             print('\r ', cnt, '/'+str(tot_ctx), file=sys.stderr, end="")
-    print("loaded ctx", file=sys.stderr)
+    print("\n loaded ctx", file=sys.stderr)
     #print(pctg[:10])
     tot_query = encoded.shape[0]
     for i in range(tot_query//10):
@@ -136,5 +135,6 @@ if __name__ == "__main__":
                 f.write(str(seq_name)+str(seq_str))
             f.close()
         print("\r Finished ", i, '%', file=sys.stderr, end="")
+    print("")
 
 
