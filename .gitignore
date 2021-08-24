@@ -2,6 +2,8 @@ __pycache__/*
 *.pth
 wandb/*
 *.a3m
+*.fasta
+*.seq
 ebd/*
 split_ebd/*
 split_train/*
