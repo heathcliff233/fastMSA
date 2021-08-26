@@ -104,11 +104,11 @@ def gen_ctx_ebd():
 
 
 import base64
-def get_binary_file_downloader_html(bin_file, file_label='File'):
+def get_binary_file_downloader_html(bin_file):
     with open(bin_file, 'rb') as f:
         data = f.read()
     bin_str = base64.b64encode(data).decode()
-    href = f'<a href="data:application/octet-stream;base64,{bin_str}" download="{os.path.basename(bin_file)}">Download {file_label}</a>'
+    href = f'<a href="data:application/octet-stream;base64,{bin_str}" download="{os.path.basename(bin_file)}">Download {os.path.basename(bin_file)}</a>'
     return href
 
 
@@ -120,7 +120,7 @@ def my_aligner():
     cnt = 0
     for fp in files:
         pref = fp.split('.')[0]
-        args = " -B "+ download_path+ "%s.a3m --F1 0.0005 --F2 5e-05 --F3 5e-07 --incE 0.0001 -E 0.0001 --cpu 8 -N 1 "%pref+upload_path+src_seq[cnt]+" "+tmp_path+"%s.fasta | grep -E \'New targets included:|Target sequences:\'"%pref
+        args = " -B "+ download_path+ "%s.a3m -E 0.001 --cpu 8 -N 3 "%pref+upload_path+src_seq[cnt]+" "+tmp_path+"%s.fasta | grep -E \'New targets included:|Target sequences:\'"%pref
         cmd = qjackhmmer+args
         os.system(cmd)
         finish_list.append(download_path+"%s.a3m"%pref)
@@ -131,7 +131,7 @@ st.title("Retriever-demo")
 st.markdown(f'Please upload one sequence in one fasta file end with .fasta/.seq')
 tar_num = st.selectbox(
     "Target num: ",
-    [128, 2048, 20000, 100000]
+    [128, 2048, 20000, 100000, 200000]
 )
 for f in os.listdir(tmp_path):
     os.remove(os.path.join(tmp_path, f))
@@ -162,5 +162,6 @@ if uploaded is not None:
     download_list = my_aligner()
     st.markdown(f'Finished')
     #st.markdown(get_binary_file_downloader_html(download_path+'1a04A01.a3m'), unsafe_allow_html=True)
-    st.markdown(get_binary_file_downloader_html(download_list[0]), unsafe_allow_html=True)
+    for i in range(len(download_list)):
+        st.markdown(get_binary_file_downloader_html(download_list[i]), unsafe_allow_html=True)
 

@@ -14,13 +14,13 @@ import faiss
 import linecache
 
 BATCHSZ=8
-tar_num = 20000
+tar_num = 100000
 #path = "./test.txt"
 path = "./split/split_dataset_test.txt"
 qdir = "/share/wangsheng/train_test_data/cath35_20201021/cath35_seq/"
 msadir = "/share/wangsheng/train_test_data/cath35_20201021/cath35_a3m/"
 ctx_dir = "./split_ebd_continue/"
-save_path = "./pred-202108241047-20000/"
+save_path = "./pred-202108250848-100000/"
 
 def qencode(model, loader, device="cuda:0"):
     model.eval()

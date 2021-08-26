@@ -4,11 +4,15 @@ wandb/*
 *.a3m
 *.fasta
 *.seq
+*.log
+*.txt
 ebd/*
 split_ebd/*
+ur90_ebd/*
 split_train/*
 split_train_new/*
 split_ebd_continue/*
 pred/*
 pred-202108192300/*
 align_pred/*
+
