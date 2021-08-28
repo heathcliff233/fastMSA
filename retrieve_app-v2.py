@@ -47,7 +47,7 @@ def qencode(model, loader, device="cuda:0"):
 def get_model():
     encoder, alphabet = esm.pretrained.esm1_t6_43M_UR50S()
     model = MyEncoder(encoder, 0)
-    prev = torch.load('./split_train/39.pth')
+    prev = torch.load('./continue_train/59.pth')
     later = dict((k[7:], v) for (k,v) in prev.items())
     model.load_state_dict(later)
     batch_converter = SingleConverter(alphabet)
@@ -59,6 +59,7 @@ def gen_ctx_ebd():
     ctx_list = os.listdir(ctx_dir)
     ctx_list.sort()
     df = ph.read_fasta(fasta_path, use_uids=False)
+    print("Finish reading fasta")
     buffer = []
     index = faiss.IndexFlatIP(768)
     cnt = 0
@@ -70,8 +71,10 @@ def gen_ctx_ebd():
                 cnt += 1
             index.add(np.stack(buffer, axis=0))
             buffer = []
+            print('\r indexed %-5d/%d'%(cnt, len(df)), end="")
     print("ctx seq num: ", len(df))
     print("ebd seq num: ", cnt)
+
     return index, df
 
 
@@ -91,7 +94,7 @@ def my_aligner():
     finish_list = []
     cnt = 0
     for fp in files:
-        pref = fp[:-4]
+        pref = fp[:-6]
         args = " -B "+ download_path+ "%s.a3m -E 0.001 --cpu 8 -N 1 "%pref+expand_seq+pref+".fasta"+" "+tmp_path+"%s.fasta | grep -E \'New targets included:|Target sequences:\'"%pref
         cmd = qjackhmmer+args
         os.system(cmd)
@@ -112,7 +115,7 @@ st.title("Retriever-demo-v2")
 st.markdown(f'Please upload one sequence in one fasta file end with .fasta/.seq')
 tar_num = st.selectbox(
     "Target num: ",
-    [128, 2048, 20000, 100000]
+    [128, 2048, 20000, 100000, 1000000]
 )
 
 for f in os.listdir(tmp_path):
@@ -150,6 +153,7 @@ if uploaded is not None:
             sp = df.iloc[tar_idx]
             sp.loc[:,'sequence'] = sp['sequence'].map(lambda x: re.sub('[(\-)]', '', x))
             sp.phylo.to_fasta(tmp_path+dataset.records[i*search_batch+j].id+".fasta", id_col='id')
+    st.markdown(f'Start alignment')
     download_list = my_aligner()
     st.markdown(f'Finished')
     #st.markdown(get_binary_file_downloader_html(download_path+'1a04A01.a3m'), unsafe_allow_html=True)

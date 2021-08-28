@@ -78,7 +78,6 @@ if __name__ == "__main__":
     later = dict((k[7:], v) for (k,v) in prev.items())
     model.load_state_dict(later)
     fasta_df = ph.read_fasta('/ssdcache/wangsheng/databases/uniref90/uniref90.fasta', use_uids=False)
-    #fasta_df = ph.read_fasta('/user/hongliang/mydpr/pred-202108250848-100000/1a0iA03.a3m', use_uids=False)
     tot_seqs = len(fasta_df)
     one_part = math.ceil(tot_seqs/num_gpus) 
     part_indexes = math.ceil(one_part/(BATCHSZ*save_per_step))
