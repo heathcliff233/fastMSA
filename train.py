@@ -1,5 +1,5 @@
 from torch.distributed.distributed_c10d import get_rank
-from torch.utils.data import distributed
+import torch.distributed as dist
 import wandb
 import pickle
 import torch
@@ -104,8 +104,9 @@ def evaluate(model, loader, threshold=0.7, use_distr=False):
             right, num = model.get_acc(model((toks1, toks2)))
             correct += right
             total += num
-    torch.distributed.all_reduce(correct, op=torch.distributed.ReduceOp.SUM)
-    torch.distributed.all_reduce(total, op=torch.distributed.ReduceOp.SUM)
+    if use_distr:
+        torch.distributed.all_reduce(correct, op=torch.distributed.ReduceOp.SUM)
+        torch.distributed.all_reduce(total, op=torch.distributed.ReduceOp.SUM)
     return correct / total
 
 def do_embedding(model, loader, path, use_distr=False, device="cuda:0"):
@@ -126,4 +127,4 @@ def do_embedding(model, loader, path, use_distr=False, device="cuda:0"):
         pickle.dump(res, f)
 
 def save(model, epoch):
-    torch.save(model.state_dict(), './continue_train/'+str(epoch)+'.pth')
+    torch.save(model.state_dict(), './larger_batch/'+str(epoch)+'.pth')

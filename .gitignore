@@ -6,6 +6,7 @@ wandb/*
 *.seq
 *.log
 *.txt
+*.ipynb
 ebd/*
 split_ebd/*
 ur90_ebd/*

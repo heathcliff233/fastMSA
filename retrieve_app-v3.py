@@ -23,10 +23,10 @@ search_batch = 10
 msadir = "./c1000_msa/" 
 fasta_path = "/ssdcache/wangsheng/databases/uniref90/uniref90.fasta"
 ctx_dir = "./t1000_ebd/"
-tmp_path = "./tmp_retrieve/"
-download_path = "./download_it/"
-upload_path = "./upload_it/"
-expand_seq = "./expand_seq/"
+tmp_path = "./v3-tmp/tmp_retrieve/"
+download_path = "./v3-tmp/download_it/"
+upload_path = "./v3-tmp/upload_it/"
+expand_seq = "./v3-tmp/expand_seq/"
 qjackhmmer = "/share/wangsheng/GitBucket/alphafold2_sheng/alphafold2/util/qjackhmmer"
 
 def qencode(model, loader, device="cuda:0"):
@@ -65,6 +65,7 @@ def gen_ctx_ebd():
     # Add phylopandas func
     df_list = [ph.read_fasta(src, use_uids=False) for src in src_list]
     df = pd.concat(df_list)
+    df.loc[:,'sequence'] = df['sequence'].map(lambda x: re.sub('[(\-)]', '', x))
     print("Finish reading fasta")
     buffer = []
     index = faiss.IndexFlatIP(768)
@@ -99,6 +100,8 @@ def my_aligner():
     #src_seq = os.listdir(expand_seq)
     finish_list = []
     cnt = 0
+    total_files = len(files)
+    align_bar = st.progress(0)
     for fp in files:
         pref = fp[:-6]
         args = " -B "+ download_path+ "%s.a3m -E 0.001 --cpu 8 -N 1 "%pref+expand_seq+pref+".fasta"+" "+tmp_path+"%s.fasta | grep -E \'New targets included:|Target sequences:\'"%pref
@@ -106,6 +109,7 @@ def my_aligner():
         os.system(cmd)
         finish_list.append(download_path+"%s.a3m"%pref)
         cnt += 1
+        align_bar.progress(cnt/total_files)
     return finish_list
 
 def gen_query(upload_file_path):
@@ -117,7 +121,7 @@ def gen_query(upload_file_path):
         seq_slice.phylo.to_fasta(expand_seq+filename+'.fasta', id_col='id')
 
 
-st.title("Retriever-demo-v2")
+st.title("Retriever-demo-v3")
 st.markdown(f'Please upload one sequence in one fasta file end with .fasta/.seq')
 tar_num = st.selectbox(
     "Target num: ",
@@ -151,14 +155,24 @@ if uploaded is not None:
     dataloader = DataLoader(dataset=dataset, batch_size=BATCHSZ, shuffle=False, collate_fn=batch_converter)
     encoded = qencode(model, dataloader, device=device)
     tot_tar = encoded.shape[0]
+    st.markdown(f'Finish encoding, searching indexes...')
+    my_bar = st.progress(0)
     for i in range(math.ceil(tot_tar/search_batch)):
-        scores, idxes = index.search(encoded[i*search_batch:(i+1)*search_batch].reshape((1,-1)), tar_num)
+        scores, idxes = index.search(encoded[i*search_batch:(i+1)*search_batch], tar_num)
         idx_batch = len(idxes)
         for j in range(idx_batch):
             tar_idx = idxes[j]
             sp = df.iloc[tar_idx]
-            sp.loc[:,'sequence'] = sp['sequence'].map(lambda x: re.sub('[(\-)]', '', x))
-            sp.phylo.to_fasta(tmp_path+dataset.records[i*search_batch+j].id+".fasta", id_col='id')
+            #sp.loc[:,'sequence'] = sp['sequence'].map(lambda x: re.sub('[(\-)]', '', x))
+            #sp.phylo.to_fasta(tmp_path+dataset.records[i*search_batch+j].id+".fasta", id_col='id')
+            ####################
+            sp1 = sp.loc[:,['id', 'sequence']]
+            with open(tmp_path+dataset.records[i*search_batch+j].id+".fasta", 'w+') as nf:
+                nf.write('>')
+            sp1.to_csv(tmp_path+dataset.records[i*search_batch+j].id+".fasta", sep='\n', header=False, index=False, line_terminator='\n>', mode='a+')
+            os.system('truncate -s-1 '+tmp_path+dataset.records[i*search_batch+j].id+".fasta")
+            ####################
+            my_bar.progress((i*search_batch+j+1)/tot_tar)
     st.markdown(f'Start alignment')
     download_list = my_aligner()
     st.markdown(f'Finished')

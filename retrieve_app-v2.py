@@ -19,7 +19,7 @@ import pandas as pd
 import phylopandas.phylopandas as ph
 
 BATCHSZ=1
-search_batch = 10
+search_batch = 4
 fasta_path = "/ssdcache/wangsheng/databases/uniref90/uniref90.fasta"
 ctx_dir = "./ur90_ebd/"
 tmp_path = "./tmp_retrieve/"
@@ -59,9 +59,15 @@ def gen_ctx_ebd():
     ctx_list = os.listdir(ctx_dir)
     ctx_list.sort()
     df = ph.read_fasta(fasta_path, use_uids=False)
+    df.loc[:,'sequence'] = df['sequence'].map(lambda x: re.sub('[(\-)]', '', x))
     print("Finish reading fasta")
     buffer = []
     index = faiss.IndexFlatIP(768)
+    ##############################
+    #index = faiss.IndexHNSWFlat(768+1, 512)
+    #index.hnsw.efSearch = 128
+    #index.hnsw.efConstruction = 200
+    ##############################
     cnt = 0
     for i in ctx_list:
         with open(ctx_dir+i, "rb") as reader:
@@ -112,7 +118,7 @@ def gen_query(upload_file_path):
 
 
 st.title("Retriever-demo-v2")
-st.markdown(f'Please upload one sequence in one fasta file end with .fasta/.seq')
+st.markdown(f'Please upload one sequence or multiple query sequences in ***one*** fasta file end with .fasta/.seq')
 tar_num = st.selectbox(
     "Target num: ",
     [128, 2048, 20000, 100000, 1000000]
@@ -145,14 +151,25 @@ if uploaded is not None:
     dataloader = DataLoader(dataset=dataset, batch_size=BATCHSZ, shuffle=False, collate_fn=batch_converter)
     encoded = qencode(model, dataloader, device=device)
     tot_tar = encoded.shape[0]
+    st.markdown(f'Finish encoding, searching indexes...')
+    my_bar = st.progress(0)
     for i in range(math.ceil(tot_tar/search_batch)):
-        scores, idxes = index.search(encoded[i*search_batch:(i+1)*search_batch].reshape((1,-1)), tar_num)
+        scores, idxes = index.search(encoded[i*search_batch:(i+1)*search_batch], tar_num)
         idx_batch = len(idxes)
         for j in range(idx_batch):
             tar_idx = idxes[j]
             sp = df.iloc[tar_idx]
-            sp.loc[:,'sequence'] = sp['sequence'].map(lambda x: re.sub('[(\-)]', '', x))
-            sp.phylo.to_fasta(tmp_path+dataset.records[i*search_batch+j].id+".fasta", id_col='id')
+            #sp.loc[:,'sequence'] = sp['sequence'].map(lambda x: re.sub('[(\-)]', '', x))
+            #sp.phylo.to_fasta(tmp_path+dataset.records[i*search_batch+j].id+".fasta", id_col='id')
+            ####################
+            sp1 = sp.loc[:,['id', 'sequence']]
+            #sp1.iloc[0,0] = '>'+sp.iloc[0,0]
+            with open(tmp_path+dataset.records[i*search_batch+j].id+".fasta", 'w+') as nf:
+                nf.write('>')
+            sp1.to_csv(tmp_path+dataset.records[i*search_batch+j].id+".fasta", sep='\n', header=False, index=False, line_terminator='\n>', mode='a+')
+            os.system('truncate -s-1 '+tmp_path+dataset.records[i*search_batch+j].id+".fasta")
+            ####################
+            my_bar.progress((i*search_batch+j)/tot_tar)
     st.markdown(f'Start alignment')
     download_list = my_aligner()
     st.markdown(f'Finished')

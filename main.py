@@ -8,6 +8,7 @@ import esm
 import torch
 import torch.nn as nn
 import torch.nn.functional as F 
+import torch.distributed as dist
 from torch.optim import AdamW, lr_scheduler
 from torch.utils.data import Dataset, DataLoader
 from model import MyEncoder
@@ -55,7 +56,7 @@ if __name__ == "__main__":
     
     model = MyEncoder(encoder, 0)
     ##################################
-    prev = torch.load('./continue_train/3.pth')
+    prev = torch.load('./continue_train/59.pth')
     later = dict((k[7:], v) for (k,v) in prev.items())
     model.load_state_dict(later)
     ##################################
@@ -94,8 +95,8 @@ if __name__ == "__main__":
             output_device=local_rank,
             find_unused_parameters=True
         )
-        trbatch = DistributedProxySampler(trbatch, num_replicas=2, rank=local_rank)
-        evbatch = DistributedProxySampler(evbatch, num_replicas=2, rank=local_rank)
+        trbatch = DistributedProxySampler(trbatch, num_replicas=dist.get_world_size(), rank=local_rank)
+        evbatch = DistributedProxySampler(evbatch, num_replicas=dist.get_world_size(), rank=local_rank)
     
     batch_converter = BatchConverter(alphabet)
     train_loader = DataLoader(dataset=train_set, collate_fn=batch_converter, batch_sampler=trbatch)
