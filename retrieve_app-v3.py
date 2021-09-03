@@ -166,11 +166,12 @@ if uploaded is not None:
             #sp.loc[:,'sequence'] = sp['sequence'].map(lambda x: re.sub('[(\-)]', '', x))
             #sp.phylo.to_fasta(tmp_path+dataset.records[i*search_batch+j].id+".fasta", id_col='id')
             ####################
-            sp1 = sp.loc[:,['id', 'sequence']]
-            with open(tmp_path+dataset.records[i*search_batch+j].id+".fasta", 'w+') as nf:
-                nf.write('>')
-            sp1.to_csv(tmp_path+dataset.records[i*search_batch+j].id+".fasta", sep='\n', header=False, index=False, line_terminator='\n>', mode='a+')
-            os.system('truncate -s-1 '+tmp_path+dataset.records[i*search_batch+j].id+".fasta")
+            sp.phylo.to_fasta_dev(tmp_path+dataset.records[i*search_batch+j].id+".fasta")
+            #sp1 = sp.loc[:,['id', 'sequence']]
+            #with open(tmp_path+dataset.records[i*search_batch+j].id+".fasta", 'w+') as nf:
+            #    nf.write('>')
+            #sp1.to_csv(tmp_path+dataset.records[i*search_batch+j].id+".fasta", sep='\n', header=False, index=False, line_terminator='\n>', mode='a+')
+            #os.system('truncate -s-1 '+tmp_path+dataset.records[i*search_batch+j].id+".fasta")
             ####################
             my_bar.progress((i*search_batch+j+1)/tot_tar)
     st.markdown(f'Start alignment')
