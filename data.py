@@ -23,6 +23,21 @@ class EbdDataset(Dataset):
         #return rec.id, re.sub('[(a-z)(\-)]', '', rec.seq.__str__())
         return rec.id, re.sub('[(\-)]', '', rec.seq.__str__())
 
+class PdDataset(Dataset):
+    def __init__(self, df):
+        #self.records = []
+        #for i in path:
+        #    self.records.extend(list(SeqIO.parse(i, "fasta")))
+        self.records = df
+
+    def __len__(self):
+        return self.records.shape[0]
+
+    def __getitem__(self, index):
+        rec = self.records.iloc[index]
+        #return rec.id, re.sub('[(a-z)(\-)]', '', rec.seq.__str__())
+        return rec['id'], re.sub('[(\-)]', '', rec['sequence'])
+
 class QueryDataset(Dataset):
     def __init__(self, path: List[str]):
         self.records = []

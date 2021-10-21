@@ -22,16 +22,17 @@ BATCHSZ=1
 search_batch = 10
 #gtmsadir = "/ssdcache/wangsheng/train_test_data/CASP_RawData/allDM_msa/"
 gtmsadir = "./c1000_msa/"
-msadir = "./c1000_msa/" 
+#msadir = "./c1000_msa/" 
 #fasta_path = "/ssdcache/zhengliangzhen/sequence_databases/uniref90_2019_07.fasta"
 fasta_path = "/ssdcache/zhengliangzhen/sequence_databases/uniref90_2020_03.fasta"
+dm_path = "/share/hongliang/seq_db.fasta" 
 #fasta_path = "/ssdcache/wangsheng/databases/uniref90/uniref90.fasta"
-ctx_dir = "./t1000_ebd/"
-tmp_path = "./v3-tmp/tmp_retrieve/"
-download_path = "./v3-tmp/download_it/"
-upload_path = "./v3-tmp/upload_it/"
-expand_seq = "./v3-tmp/expand_seq/"
-qjackhmmer = "/share/wangsheng/GitBucket/alphafold2_sheng/alphafold2/util/qjackhmmer"
+ctx_dir = "./random_ebd/"
+tmp_path = "./v4-tmp/tmp_retrieve/"
+download_path = "./v4-tmp/download_it/"
+upload_path = "./v4-tmp/upload_it/"
+expand_seq = "./v4-tmp/expand_seq/"
+qjackhmmer = "/share/hongliang/qjackhmmer"
 
 def qencode(model, loader, device="cuda:0"):
     model.eval()
@@ -69,14 +70,8 @@ def get_raw_seq_database():
 def gen_ctx_ebd():
     ctx_list = os.listdir(ctx_dir)
     ctx_list.sort()
-    #df = ph.read_fasta(fasta_path, use_uids=False)
-    file_list = os.listdir(msadir)
-    file_list.sort()
-    src_list = [msadir+file for file in file_list]
-    # Add phylopandas func
-    df_list = [ph.read_fasta(src, use_uids=False) for src in src_list]
-    df = pd.concat(df_list)
-    df.loc[:,'sequence'] = df['sequence'].map(lambda x: re.sub('[(\-)]', '', x))
+    df = ph.read_fasta_dev(dm_path, use_uids=False)
+    #df.loc[:,'sequence'] = df['sequence'].map(lambda x: re.sub('[(\-)]', '', x))
     print("Finish reading fasta")
     buffer = []
     index = faiss.IndexFlatIP(768)
@@ -118,7 +113,7 @@ def my_aligner():
         args = " -B "+ download_path+ "%s.a3m -E 0.001 --cpu 8 -N 3 "%pref+expand_seq+pref+".fasta"+" "+tmp_path+"%s.fasta | grep -E \'New targets included:|Target sequences:\'"%pref
         cmd = qjackhmmer+args
         os.system(cmd)
-        finish_list.append(downloadpath+"%s.a3m"%pref)
+        finish_list.append(download_path+"%s.a3m"%pref)
         cnt += 1
         align_bar.progress(cnt/total_files)
     return finish_list
@@ -190,9 +185,10 @@ if uploaded is not None:
             sp = sp.drop_duplicates(subset=['id'], keep='first')
             #st.markdown("contain seq %d"%sp.shape[0])
             #########################################
-            # Retieve raw sequence from the UR90 database
-            sel_ids = sp['id'].map(lambda x: x.split('/')[0])
-            sel_ids = sel_ids.drop_duplicates()
+            # Retrieve raw sequence from the UR90 database
+            #sel_ids = sp['id'].map(lambda x: x.split('/')[0])
+            #sel_ids = sel_ids.drop_duplicates()
+            sel_ids = sp['id'].drop_duplicates()
             raw_seq = seq_database[seq_database['id'].isin(sel_ids)]
             #st.markdown("raw seq num %d"%raw_seq.shape[0])
             #########################################
@@ -214,6 +210,8 @@ if uploaded is not None:
             
             #====get gt, calculate recall rate
             #gt = ph.read_fasta(gtmsadir+qs[i*search_batch+j][:-6]+'.a3m')
+            #gt['id'] = gt['id'].map(lambda x: x.split('/')[0])
+            #gt = gt.drop_duplicates(subset=['id'], keep='first')
             #num_rt = sp.shape[0]
             #num_gt = gt.shape[0]
             #num_cb = pd.concat([gt, sp], axis=0).drop_duplicates(subset=['id'], keep='first').shape[0]
@@ -222,14 +220,14 @@ if uploaded is not None:
             #st.markdown("rc %d / %d"%((num_rt+num_gt-num_cb), num_gt))
             #########################################
             #sp.phylo.to_fasta_dev(tmp_path+dataset.records[i*search_batch+j].id+".fasta")
-            raw_seq.phylo.to_fasta_dev(tmp_path+dataset.records[i*search_batch+j].id+".fasta")
+            raw_seq.phylo.to_fasta(tmp_path+dataset.records[i*search_batch+j].id+".fasta", id_col='id')
             my_bar.progress((i*search_batch+j+1)/tot_tar)
     #out_str = "Recall rate = %.2f%%" % (tot_recall_rate/tot_tar*100)
     #st.markdown(out_str)
     st.markdown(f'Start alignment')
     download_list = my_aligner()
     st.markdown(f'Finished')
-    os.system("cp -r ./v3-tmp/tmp_retrieve /share/hongliang/")
+    #os.system("cp -r ./v4-tmp/tmp_retrieve /share/hongliang/")
     #os.system("cp -r ./v3-tmp/download_it /share/hongliang/")
     
     #st.markdown(get_binary_file_downloader_html(download_path+'1a04A01.a3m'), unsafe_allow_html=True)

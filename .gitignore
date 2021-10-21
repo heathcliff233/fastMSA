@@ -11,6 +11,7 @@ ebd/*
 split_ebd/*
 ur90_ebd/*
 t1000_ebd/*
+random_ebd/*
 split_train/*
 split_train_new/*
 split_ebd_continue/*
