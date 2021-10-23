@@ -20,12 +20,14 @@ import phylopandas.phylopandas as ph
 
 BATCHSZ=1
 search_batch = 10
+gtmsadir = "/ssdcache/wangsheng/train_test_data/CAMEO_RawData/cameo_msa/"
 #gtmsadir = "/ssdcache/wangsheng/train_test_data/CASP_RawData/allDM_msa/"
-gtmsadir = "./c1000_msa/"
+#gtmsadir = "./c1000_msa/"
 msadir = "./c1000_msa/" 
 #fasta_path = "/ssdcache/zhengliangzhen/sequence_databases/uniref90_2019_07.fasta"
 fasta_path = "/ssdcache/zhengliangzhen/sequence_databases/uniref90_2020_03.fasta"
 #fasta_path = "/ssdcache/wangsheng/databases/uniref90/uniref90.fasta"
+small_database_path = "/share/hongliang/res-database.fasta"
 ctx_dir = "./t1000_ebd/"
 tmp_path = "./v3-tmp/tmp_retrieve/"
 download_path = "./v3-tmp/download_it/"
@@ -61,6 +63,13 @@ def get_model():
 @st.cache(allow_output_mutation=True)
 def get_raw_seq_database():
     df = ph.read_fasta(fasta_path, use_uids=False)
+    #df = ph.read_fasta_dev(fasta_path)
+    return df
+
+
+@st.cache(allow_output_mutation=True)
+def get_small_database():
+    df = ph.read_fasta(small_database_path, use_uids=False)
     #df = ph.read_fasta_dev(fasta_path)
     return df
 
@@ -118,7 +127,7 @@ def my_aligner():
         args = " -B "+ download_path+ "%s.a3m -E 0.001 --cpu 8 -N 3 "%pref+expand_seq+pref+".fasta"+" "+tmp_path+"%s.fasta | grep -E \'New targets included:|Target sequences:\'"%pref
         cmd = qjackhmmer+args
         os.system(cmd)
-        finish_list.append(downloadpath+"%s.a3m"%pref)
+        finish_list.append(download_path+"%s.a3m"%pref)
         cnt += 1
         align_bar.progress(cnt/total_files)
     return finish_list
@@ -153,6 +162,7 @@ device = torch.device("cuda:0")
 model = model.to(device)
 index, df = gen_ctx_ebd()
 seq_database = get_raw_seq_database()
+cov_database = get_small_database()
 #=== remove duplicates in ctx
 #ori_idx = df['id'].map(lambda x: x.split('/')[0])
 #ori_idx = ori_idx.drop_duplicates(keep='first')
@@ -193,7 +203,7 @@ if uploaded is not None:
             # Retieve raw sequence from the UR90 database
             sel_ids = sp['id'].map(lambda x: x.split('/')[0])
             sel_ids = sel_ids.drop_duplicates()
-            raw_seq = seq_database[seq_database['id'].isin(sel_ids)]
+            raw_seq = cov_database[cov_database['id'].isin(sel_ids)]
             #st.markdown("raw seq num %d"%raw_seq.shape[0])
             #########################################
             #====recall rate calculation for casp
@@ -213,23 +223,30 @@ if uploaded is not None:
             #st.markdown("rc %d / %d"%((num_rt+num_gt-num_cb), num_gt))
             
             #====get gt, calculate recall rate
-            #gt = ph.read_fasta(gtmsadir+qs[i*search_batch+j][:-6]+'.a3m')
-            #num_rt = sp.shape[0]
-            #num_gt = gt.shape[0]
+            gt = ph.read_fasta(gtmsadir+qs[i*search_batch+j][:-6]+'.a3m')
+            gt['id'] = gt['id'].map(lambda x: x.split('/')[0])
+            gt = gt.drop_duplicates(subset=['id'], keep='first')
+            raw_gt = cov_database[cov_database['id'].isin(gt['id'])]
+            num_rt = raw_seq.shape[0]
+            num_gt = raw_gt.shape[0]
+            num_cb = pd.concat([raw_gt, raw_seq], axis=0).drop_duplicates(subset=['id']).shape[0]
             #num_cb = pd.concat([gt, sp], axis=0).drop_duplicates(subset=['id'], keep='first').shape[0]
-            #rc_rate = (num_rt + num_gt - num_cb) / num_gt
-            #tot_recall_rate += rc_rate
-            #st.markdown("rc %d / %d"%((num_rt+num_gt-num_cb), num_gt))
+            if num_gt==0:
+                rc_rate = 1
+            else:
+                rc_rate = (num_rt + num_gt - num_cb) / num_gt
+            tot_recall_rate += rc_rate
+            st.markdown("rc %d / %d"%((num_rt+num_gt-num_cb), num_gt))
             #########################################
             #sp.phylo.to_fasta_dev(tmp_path+dataset.records[i*search_batch+j].id+".fasta")
             raw_seq.phylo.to_fasta_dev(tmp_path+dataset.records[i*search_batch+j].id+".fasta")
             my_bar.progress((i*search_batch+j+1)/tot_tar)
-    #out_str = "Recall rate = %.2f%%" % (tot_recall_rate/tot_tar*100)
-    #st.markdown(out_str)
+    out_str = "Recall rate = %.2f%%" % (tot_recall_rate/tot_tar*100)
+    st.markdown(out_str)
     st.markdown(f'Start alignment')
     download_list = my_aligner()
     st.markdown(f'Finished')
-    os.system("cp -r ./v3-tmp/tmp_retrieve /share/hongliang/")
+    os.system("cp -r ./v3-tmp/download_it /share/hongliang/download_it-v3")
     #os.system("cp -r ./v3-tmp/download_it /share/hongliang/")
     
     #st.markdown(get_binary_file_downloader_html(download_path+'1a04A01.a3m'), unsafe_allow_html=True)

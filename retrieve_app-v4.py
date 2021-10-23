@@ -20,11 +20,13 @@ import phylopandas.phylopandas as ph
 
 BATCHSZ=1
 search_batch = 10
+gtmsadir = "/ssdcache/wangsheng/train_test_data/CAMEO_RawData/cameo_msa/"
 #gtmsadir = "/ssdcache/wangsheng/train_test_data/CASP_RawData/allDM_msa/"
-gtmsadir = "./c1000_msa/"
+#gtmsadir = "./c1000_msa/"
 #msadir = "./c1000_msa/" 
 #fasta_path = "/ssdcache/zhengliangzhen/sequence_databases/uniref90_2019_07.fasta"
 fasta_path = "/ssdcache/zhengliangzhen/sequence_databases/uniref90_2020_03.fasta"
+fasta_path = "/share/hongliang/res-database.fasta"
 dm_path = "/share/hongliang/seq_db.fasta" 
 #fasta_path = "/ssdcache/wangsheng/databases/uniref90/uniref90.fasta"
 ctx_dir = "./random_ebd/"
@@ -127,7 +129,7 @@ def gen_query(upload_file_path):
         seq_slice.phylo.to_fasta(expand_seq+filename+'.fasta', id_col='id')
 
 
-st.title("Retriever-demo-v3")
+st.title("Retriever-demo-v4")
 st.markdown(f'Please upload one sequence in one fasta file end with .fasta/.seq')
 tar_num = st.selectbox(
     "Target num: ",
@@ -209,26 +211,27 @@ if uploaded is not None:
             #st.markdown("rc %d / %d"%((num_rt+num_gt-num_cb), num_gt))
             
             #====get gt, calculate recall rate
-            #gt = ph.read_fasta(gtmsadir+qs[i*search_batch+j][:-6]+'.a3m')
-            #gt['id'] = gt['id'].map(lambda x: x.split('/')[0])
-            #gt = gt.drop_duplicates(subset=['id'], keep='first')
-            #num_rt = sp.shape[0]
-            #num_gt = gt.shape[0]
-            #num_cb = pd.concat([gt, sp], axis=0).drop_duplicates(subset=['id'], keep='first').shape[0]
-            #rc_rate = (num_rt + num_gt - num_cb) / num_gt
-            #tot_recall_rate += rc_rate
-            #st.markdown("rc %d / %d"%((num_rt+num_gt-num_cb), num_gt))
+            gt = ph.read_fasta(gtmsadir+qs[i*search_batch+j][:-6]+'.a3m')
+            gt['id'] = gt['id'].map(lambda x: x.split('/')[0])
+            gt_seq = seq_database[seq_database['id'].isin(gt['id'])]
+            gt_seq = gt_seq.drop_duplicates(subset=['id'], keep='first')
+            num_rt = raw_seq.shape[0]
+            num_gt = gt_seq.shape[0]
+            num_cb = pd.concat([gt_seq, raw_seq], axis=0).drop_duplicates(subset=['id'], keep='first').shape[0]
+            rc_rate = 1 if num_gt==0 else (num_rt + num_gt - num_cb) / num_gt
+            tot_recall_rate += rc_rate
+            st.markdown("rc %d / %d"%((num_rt+num_gt-num_cb), num_gt))
             #########################################
-            #sp.phylo.to_fasta_dev(tmp_path+dataset.records[i*search_batch+j].id+".fasta")
-            raw_seq.phylo.to_fasta(tmp_path+dataset.records[i*search_batch+j].id+".fasta", id_col='id')
+            raw_seq.phylo.to_fasta_dev(tmp_path+dataset.records[i*search_batch+j].id+".fasta")
+            #raw_seq.phylo.to_fasta(tmp_path+dataset.records[i*search_batch+j].id+".fasta", id_col='id')
             my_bar.progress((i*search_batch+j+1)/tot_tar)
-    #out_str = "Recall rate = %.2f%%" % (tot_recall_rate/tot_tar*100)
-    #st.markdown(out_str)
+    out_str = "Recall rate = %.2f%%" % (tot_recall_rate/tot_tar*100)
+    st.markdown(out_str)
     st.markdown(f'Start alignment')
     download_list = my_aligner()
     st.markdown(f'Finished')
     #os.system("cp -r ./v4-tmp/tmp_retrieve /share/hongliang/")
-    #os.system("cp -r ./v3-tmp/download_it /share/hongliang/")
+    os.system("cp -r ./v4-tmp/download_it /share/hongliang/download_it-v4")
     
     #st.markdown(get_binary_file_downloader_html(download_path+'1a04A01.a3m'), unsafe_allow_html=True)
     #for i in range(len(download_list)):
