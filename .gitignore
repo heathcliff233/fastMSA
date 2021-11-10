@@ -1,4 +1,5 @@
 __pycache__/*
+.ipynb_checkpoints/*
 *.pth
 wandb/*
 *.a3m
@@ -8,7 +9,9 @@ wandb/*
 *.txt
 *.ipynb
 *.png
+*.out
 ebd/*
+c1000_msa/*
 split_ebd/*
 ur90_ebd/*
 t1000_ebd/*
@@ -21,4 +24,7 @@ pred-202108192300/*
 align_pred/*
 fseq_ebd_v1/*
 fseq_ebd_v2/*
+test/*
+test_index/*
+test-env/*
 
