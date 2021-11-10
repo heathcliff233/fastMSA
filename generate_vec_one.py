@@ -21,16 +21,21 @@ DISTRIBUTED = True
 BATCHSZ = 128
 num_gpus = 4
 #path = "./testset/"
-fasta_path = '/share/hongliang/seq_db.fasta'
-save_path = './random_ebd/'
-os.environ["CUDA_VISIBLE_DEVICES"] = "3,5,6,7"
+#fasta_path = '/share/hongliang/seq_db.fasta'
+#fasta_path = '/share/hongliang/res-database.fasta'
+fasta_path = '/ssdcache/wangsheng/databases/uniref90/uniref90.fasta'
+#fasta_path = '/ssdcache/zhengliangzhen/hongliang/ur90_201803.fasta'
+#save_path = './random_ebd/'
+save_path = './fseq_ebd_v2/'
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,2,4,5"
 
 if __name__ == "__main__":
     encoder, alphabet = esm.pretrained.esm1_t6_43M_UR50S()
     print("loaded model")
     
     model = MyEncoder(encoder, 0)
-    prev = torch.load('./continue_train/59.pth')
+    prev = torch.load('./model_from_dgx/v2/99.pth')
+    #prev = torch.load('./continue_train/59.pth')
     later = dict((k[7:], v) for (k,v) in prev.items())
     model.load_state_dict(later)
     #model.load_state_dict(torch.load('./full/19.pth').module)
@@ -46,7 +51,7 @@ if __name__ == "__main__":
 
     model = model.to(device)
 
-    df = ph.read_fasta_dev(fasta_path)
+    df = ph.read_fasta(fasta_path)
     df_for_this_node = df
     if DISTRIBUTED:
         len_df = df.shape[0]
@@ -60,7 +65,7 @@ if __name__ == "__main__":
     
     batch_converter = SingleConverter(alphabet)
     lsdf = df_for_this_node.shape[0]
-    df_list = [df_for_this_node.iloc[i*lsdf//100:(i+1)*lsdf//100] for i in range(100)]
+    df_list = [df_for_this_node.iloc[i*(lsdf//100+1):(i+1)*(lsdf//100+1)] for i in range(100)]
     for i in range(100) :
         dlog = df_list[i]
         dataset = PdDataset(dlog)

@@ -1,0 +1,8 @@
+/user/hongliang/mydpr/hmmer-batch/jack.sh: line 9: jackhmmer: command not found
+/user/hongliang/mydpr/hmmer-batch/jack.sh: line 10: syntax error near unexpected token `done'
+/user/hongliang/mydpr/hmmer-batch/jack.sh: line 10: `  done'
+
+real	22m28.230s
+user	78m40.103s
+sys	0m28.065s
+Completed!

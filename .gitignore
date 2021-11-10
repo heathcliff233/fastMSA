@@ -7,6 +7,7 @@ wandb/*
 *.log
 *.txt
 *.ipynb
+*.png
 ebd/*
 split_ebd/*
 ur90_ebd/*
@@ -18,4 +19,6 @@ split_ebd_continue/*
 pred/*
 pred-202108192300/*
 align_pred/*
+fseq_ebd_v1/*
+fseq_ebd_v2/*
 

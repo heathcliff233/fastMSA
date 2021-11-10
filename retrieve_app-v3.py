@@ -20,8 +20,8 @@ import phylopandas.phylopandas as ph
 
 BATCHSZ=1
 search_batch = 10
-gtmsadir = "/ssdcache/wangsheng/train_test_data/CAMEO_RawData/cameo_msa/"
-#gtmsadir = "/ssdcache/wangsheng/train_test_data/CASP_RawData/allDM_msa/"
+#gtmsadir = "/ssdcache/wangsheng/train_test_data/CAMEO_RawData/cameo_msa/"
+gtmsadir = "/ssdcache/wangsheng/train_test_data/CASP_RawData/allDM_msa/"
 #gtmsadir = "./c1000_msa/"
 msadir = "./c1000_msa/" 
 #fasta_path = "/ssdcache/zhengliangzhen/sequence_databases/uniref90_2019_07.fasta"
@@ -145,7 +145,7 @@ st.title("Retriever-demo-v3")
 st.markdown(f'Please upload one sequence in one fasta file end with .fasta/.seq')
 tar_num = st.selectbox(
     "Target num: ",
-    [128, 2048, 20000, 100000, 200000, 400000, 500000, 600000, 800000, 1000000, 2000000, 10000000]
+    [128, 2048, 20000, 100000, 200000, 400000, 500000, 600000, 800000, 1000000, 2000000, 5000000]
 )
 
 for f in os.listdir(tmp_path):
@@ -239,12 +239,12 @@ if uploaded is not None:
             st.markdown("rc %d / %d"%((num_rt+num_gt-num_cb), num_gt))
             #########################################
             #sp.phylo.to_fasta_dev(tmp_path+dataset.records[i*search_batch+j].id+".fasta")
-            raw_seq.phylo.to_fasta_dev(tmp_path+dataset.records[i*search_batch+j].id+".fasta")
+            #raw_seq.phylo.to_fasta_dev(tmp_path+dataset.records[i*search_batch+j].id+".fasta")
             my_bar.progress((i*search_batch+j+1)/tot_tar)
     out_str = "Recall rate = %.2f%%" % (tot_recall_rate/tot_tar*100)
     st.markdown(out_str)
     st.markdown(f'Start alignment')
-    download_list = my_aligner()
+    #download_list = my_aligner()
     st.markdown(f'Finished')
     os.system("cp -r ./v3-tmp/download_it /share/hongliang/download_it-v3")
     #os.system("cp -r ./v3-tmp/download_it /share/hongliang/")
