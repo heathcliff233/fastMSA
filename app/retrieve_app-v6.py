@@ -7,6 +7,7 @@ import numpy as np
 import esm
 import torch
 from torch.utils.data import Dataset, DataLoader, dataset
+sys.path.append('/user/hongliang/mydpr')
 from model import MyEncoder
 from data import QueryDataset, EbdDataset, SingleConverter
 from myutils import get_filename
