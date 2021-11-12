@@ -17,15 +17,15 @@ import torch.nn as nn
 import torch.nn.functional as F 
 from torch.optim import AdamW, lr_scheduler
 from torch.utils.data import Dataset, DataLoader
-from model import MyEncoder
-from data import EbdDataset, SingleConverter, DistributedProxySampler
+sys.path.append('/user/hongliang/mydpr')
+from model.model import MyEncoder
+from data.data import EbdDataset, SingleConverter, DistributedProxySampler
 
 DISTRIBUTED = True
 BATCHSZ = 128
 save_per_step = 100
 num_gpus = 4
 #path = "./testset/"
-path = "/share/wangsheng/train_test_data/cath35_20201021/cath35_a3m/"
 save_path = './ur90_ebd/'
 
 

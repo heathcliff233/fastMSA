@@ -12,10 +12,11 @@ import torch.nn as nn
 import torch.nn.functional as F 
 from torch.optim import AdamW, lr_scheduler
 from torch.utils.data import Dataset, DataLoader
-from model import MyEncoder
-from data import PdDataset, SingleConverter, DistributedProxySampler
-from train import do_embedding
-from myutils import wc_count, get_filename
+sys.path.append('/user/hongliang/mydpr')
+from model.model import MyEncoder
+from data.data import PdDataset, SingleConverter, DistributedProxySampler
+from train.train import do_embedding
+from utils.myutils import wc_count, get_filename
 
 DISTRIBUTED = True
 BATCHSZ = 128

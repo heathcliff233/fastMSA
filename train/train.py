@@ -127,4 +127,4 @@ def do_embedding(model, loader, path, use_distr=False, device="cuda:0"):
         pickle.dump(res, f)
 
 def save(model, epoch):
-    torch.save(model.state_dict(), './larger_batch/'+str(epoch)+'.pth')
+    torch.save(model.state_dict(), './saved_model/'+str(epoch)+'.pth')

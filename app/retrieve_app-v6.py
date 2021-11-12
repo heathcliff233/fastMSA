@@ -8,9 +8,9 @@ import esm
 import torch
 from torch.utils.data import Dataset, DataLoader, dataset
 sys.path.append('/user/hongliang/mydpr')
-from model import MyEncoder
-from data import QueryDataset, EbdDataset, SingleConverter
-from myutils import get_filename
+from model.model import MyEncoder
+from data.data import QueryDataset, EbdDataset, SingleConverter
+from utils.myutils import get_filename
 import faiss
 import streamlit as st
 import sys 
@@ -34,7 +34,7 @@ gtmsadir = "/ssdcache/wangsheng/train_test_data/CASP_RawData/allDM_msa/"
 dm_path = "/ssdcache/zhengliangzhen/hongliang/ur90_201803.fasta"
 #fasta_path = "/ssdcache/wangsheng/databases/uniref90/uniref90.fasta"
 #ctx_dir = "./random_ebd/"
-ctx_dir = "./fseq_ebd_v2/"
+ctx_dir = "../fseq_ebd_v2/"
 tmp_path = "./v6-tmp/tmp_retrieve/"
 download_path = "./v6-tmp/download_it/"
 upload_path = "./v6-tmp/upload_it/"
@@ -59,7 +59,7 @@ def qencode(model, loader, device="cuda:0"):
 def get_model():
     encoder, alphabet = esm.pretrained.esm1_t6_43M_UR50S()
     model = MyEncoder(encoder, 0)
-    prev = torch.load('./model_from_dgx/v2/99.pth')
+    prev = torch.load('../model_from_dgx/v2/99.pth')
     later = dict((k[7:], v) for (k,v) in prev.items())
     model.load_state_dict(later)
     batch_converter = SingleConverter(alphabet)

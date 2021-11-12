@@ -2,6 +2,7 @@ import pickle
 import wandb
 import subprocess
 import os
+import sys
 from typing import Sequence, Tuple, List, Union
 import numpy as np
 import esm
@@ -11,10 +12,11 @@ import torch.nn.functional as F
 import torch.distributed as dist
 from torch.optim import AdamW, lr_scheduler
 from torch.utils.data import Dataset, DataLoader
-from model import MyEncoder
-from data import MyDataset, BatchConverter, DistributedProxySampler
-from train import train, evaluate
-from myutils import get_filename
+sys.path.append('/user/hongliang/mydpr')
+from model.model import MyEncoder
+from data.data import MyDataset, BatchConverter, DistributedProxySampler
+from train.train import train, evaluate
+from utils.myutils import get_filename
 
 DISTRIBUTED = True
 TRBATCHSZ = 24
