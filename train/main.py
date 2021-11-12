@@ -58,9 +58,9 @@ if __name__ == "__main__":
     
     model = MyEncoder(encoder, 0)
     ##################################
-    prev = torch.load('./continue_train/59.pth')
-    later = dict((k[7:], v) for (k,v) in prev.items())
-    model.load_state_dict(later)
+    #prev = torch.load('./continue_train/59.pth')
+    #later = dict((k[7:], v) for (k,v) in prev.items())
+    #model.load_state_dict(later)
     ##################################
     device = torch.device("cuda:0")
     if DISTRIBUTED:
@@ -79,10 +79,10 @@ if __name__ == "__main__":
             init_wandb()
     
     model = model.to(device)
-    trpath = './split/train.txt'
+    trpath = '../split/train.txt'
     trnames, trlines = get_filename(trpath)
     trnames = [path+name for name in trnames]
-    evpath = './split/valid.txt'
+    evpath = '../split/valid.txt'
     evnames, evlines = get_filename(evpath)
     evnames = [path+name for name in evnames]
     print(len(trnames))

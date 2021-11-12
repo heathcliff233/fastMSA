@@ -12,6 +12,7 @@ We use a query encoder and a context encoder. The dataset is encoded using the c
 
 ## Quick stark
 
+- `git clone git@github.com:heathcliff233/fastMSA.git`
 - download the model `pth` file and set the path `path_to_model`
 - download the context encoding to directory `path_to_ctx`, the provided ctx encoding is based on UniRef90 2018.3, change it into two-line format and set the path as `path_to_ur90`
 - `cd app`
@@ -24,7 +25,7 @@ if you would like to use your own database:
 - decide whether to use multiple GPUs. Note that it takes around 24h to encode 70M sequences using 4 V100 GPUs.
   * single card: 
     - set `DISTRIBUTED=False` in gen_u90.py
-    - `python3 gen_u90.py`
+    - `python3 generate_vec_one.py`
   * distributed mode:
     - set `DISTRIBUTED=True` in gen_u90.py
     - `python3 -m torch.distributed.launch --nproc_per_node=4 generate_vec_one.py`
